@@ -160,7 +160,7 @@ export default function MissionControl() {
             }}>{overallPct}%</div>
           </div>
           <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            Overall
+            Campaign
           </div>
         </div>
       </div>

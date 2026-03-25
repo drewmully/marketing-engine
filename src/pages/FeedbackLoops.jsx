@@ -1,11 +1,11 @@
 import { useCampaign } from "../context/CampaignContext";
 import { useAuth } from "../context/AuthContext";
-import { FUNNEL_STAGES } from "../data/campaignData";
+import { FUNNEL_STAGES, JOURNEY_STAGES } from "../data/campaignData";
 import { AddButton } from "../components/StatusSelect";
 import { EditableText } from "../components/EditableField";
 
 export default function FeedbackLoops() {
-  const { insights, funnel, creatives, tasks } = useCampaign();
+  const { insights, funnel, creatives, tasks, journey } = useCampaign();
   const { isEditMode } = useAuth();
 
   return (
@@ -43,6 +43,134 @@ export default function FeedbackLoops() {
         </div>
       </div>
 
+      {/* Customer Journey Map */}
+      <div style={{ marginBottom: 32 }}>
+        <div className="section-header">
+          <div className="section-dot" style={{ background: "var(--purple)" }} />
+          <div className="section-title">Customer Journey</div>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
+          Define and track how people move from stranger to advocate. Each transition has channels, triggers, and metrics.
+        </p>
+
+        {/* Journey stage visual */}
+        <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 20, overflowX: "auto", padding: "4px 0" }}>
+          {JOURNEY_STAGES.map((stage, i) => (
+            <div key={stage.id} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+              <div style={{
+                textAlign: "center", padding: "10px 14px",
+                background: `${stage.color}0c`, borderRadius: "var(--radius-sm)",
+                border: `1px solid ${stage.color}25`, minWidth: 100,
+                borderBottom: `3px solid ${stage.color}`,
+              }}>
+                <div style={{ fontSize: 18, marginBottom: 2 }}>{stage.icon}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: stage.color, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  {stage.name}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 2 }}>{stage.description}</div>
+              </div>
+              {i < JOURNEY_STAGES.length - 1 && (
+                <div style={{ color: stage.color, fontSize: 16, padding: "0 4px", flexShrink: 0 }}>→</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Journey transitions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {journey.items.map((j) => {
+            const from = JOURNEY_STAGES.find((s) => s.id === j.fromStage);
+            const to = JOURNEY_STAGES.find((s) => s.id === j.toStage);
+            return (
+              <div key={j.id} className="card" style={{
+                padding: "14px 18px",
+                borderLeft: `4px solid ${to?.color || "var(--border)"}`,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{
+                      fontSize: 12, fontWeight: 700, color: from?.color,
+                      padding: "2px 8px", borderRadius: "var(--radius-sm)",
+                      background: `${from?.color}12`,
+                    }}>{from?.icon} {from?.name}</span>
+                    <span style={{ color: "var(--text-faint)", fontSize: 14 }}>→</span>
+                    <span style={{
+                      fontSize: 12, fontWeight: 700, color: to?.color,
+                      padding: "2px 8px", borderRadius: "var(--radius-sm)",
+                      background: `${to?.color}12`,
+                    }}>{to?.icon} {to?.name}</span>
+                  </div>
+                  {isEditMode && (
+                    <button onClick={() => journey.remove(j.id)}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14 }}>×</button>
+                  )}
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Trigger
+                    </div>
+                    <EditableText value={j.trigger}
+                      onChange={(v) => journey.update(j.id, { trigger: v })}
+                      placeholder="What causes this transition?" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Channels
+                    </div>
+                    <EditableText value={j.channels}
+                      onChange={(v) => journey.update(j.id, { channels: v })}
+                      placeholder="Which channels drive this?" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Key Metric
+                    </div>
+                    <EditableText value={j.metric}
+                      onChange={(v) => journey.update(j.id, { metric: v })}
+                      placeholder="How do we measure?" />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 8 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Current
+                    </div>
+                    <EditableText value={j.currentValue}
+                      onChange={(v) => journey.update(j.id, { currentValue: v })}
+                      placeholder="—" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Target
+                    </div>
+                    <EditableText value={j.targetValue}
+                      onChange={(v) => journey.update(j.id, { targetValue: v })}
+                      placeholder="Set a target" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                      Notes
+                    </div>
+                    <EditableText value={j.notes}
+                      onChange={(v) => journey.update(j.id, { notes: v })}
+                      placeholder="Observations, blockers..." />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <AddButton label="Add Journey Transition" onClick={() => journey.add({
+          fromStage: "stranger", toStage: "aware",
+          channels: "", trigger: "", metric: "",
+          currentValue: "—", targetValue: "", notes: "",
+        })} />
+      </div>
+
       {/* Quick stats */}
       <div className="grid-3" style={{ marginBottom: 24 }}>
         <div className="exec-stat-card" style={{ "--exec-color": "var(--green)", textAlign: "center", padding: 16 }}>
@@ -69,7 +197,10 @@ export default function FeedbackLoops() {
       </div>
 
       {/* Insights log */}
-      <div className="card-label">Insights Log</div>
+      <div className="section-header">
+        <div className="section-dot" style={{ background: "var(--teal)" }} />
+        <div className="section-title">Insights Log</div>
+      </div>
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
         Log what you learn. Each insight can generate a new task.
       </p>

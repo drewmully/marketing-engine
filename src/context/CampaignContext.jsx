@@ -3,6 +3,7 @@ import {
   CAMPAIGN_DEFAULTS, FUNNEL_ROWS_DEFAULTS, MOMENTS_DEFAULTS,
   TASKS_DEFAULTS, CREATIVES_DEFAULTS, CHANNELS_DEFAULTS,
   OFFERS_DEFAULTS, INSIGHTS_DEFAULTS, POST_LAUNCH_DEFAULTS,
+  JOURNEY_DEFAULTS,
 } from "../data/campaignData";
 import { getValue, setValue } from "../lib/supabase";
 
@@ -74,9 +75,10 @@ export function CampaignProvider({ children }) {
   const offers = useEntityList("offers", OFFERS_DEFAULTS);
   const insights = useEntityList("insights", INSIGHTS_DEFAULTS);
   const postLaunch = useEntityList("postLaunch", POST_LAUNCH_DEFAULTS);
+  const journey = useEntityList("journey", JOURNEY_DEFAULTS);
 
   const loaded = campLoaded && funnel.loaded && moments.loaded && tasks.loaded &&
-    creatives.loaded && channels.loaded && offers.loaded && insights.loaded && postLaunch.loaded;
+    creatives.loaded && channels.loaded && offers.loaded && insights.loaded && postLaunch.loaded && journey.loaded;
 
   const updateCampaign = useCallback((updates) => {
     setCampaign((prev) => ({ ...prev, ...updates }));
@@ -109,9 +111,9 @@ export function CampaignProvider({ children }) {
 
   const value = useMemo(() => ({
     campaign, updateCampaign, updateKPI,
-    funnel, moments, tasks, creatives, channels, offers, insights, postLaunch,
+    funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey,
     stats, loaded,
-  }), [campaign, updateCampaign, updateKPI, funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, stats, loaded]);
+  }), [campaign, updateCampaign, updateKPI, funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey, stats, loaded]);
 
   return <CampaignContext.Provider value={value}>{children}</CampaignContext.Provider>;
 }

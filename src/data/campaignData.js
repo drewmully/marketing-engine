@@ -75,10 +75,10 @@ export const CAMPAIGN_DEFAULTS = {
     },
   ],
   primaryKPIs: [
-    { id: "kpi-members", name: "New Paid Members", target: "500", current: "0" },
+    { id: "kpi-members", name: "Net New Members", target: "500", current: "0" },
     { id: "kpi-cvr", name: "Conversion Rate", target: "4.5%", current: "—" },
     { id: "kpi-cac", name: "CAC", target: "$35", current: "—" },
-    { id: "kpi-trial-cvr", name: "Trial → Paid", target: "30%", current: "—" },
+    { id: "kpi-trial-cvr", name: "Legacy → Paid", target: "30%", current: "—" },
   ],
   secondaryKPIs: [
     { id: "kpi-ctr", name: "CTR", target: "", current: "—" },
@@ -289,7 +289,7 @@ export const CREATIVES_DEFAULTS = [
 // ─── CHANNELS ───────────────────────────────────────────────────
 export const CHANNELS_DEFAULTS = [
   {
-    id: "ch-meta", name: "Meta Ads (IG / FB)", emoji: "📱",
+    id: "ch-meta", name: "Meta (IG / FB)", emoji: "📱",
     strategy: "Lead with short-form video Reels. Retarget with value comparison graphics. Build content specific to platform. Focus on proven formats.",
     targetAudience: "Golfers 25–55, public course players, gear shoppers, value-conscious",
     contentTypes: "Reels, Stories, Carousel, Static ads, Retargeting",
@@ -344,6 +344,13 @@ export const CHANNELS_DEFAULTS = [
     contentTypes: "Reviews, unboxings, honest takes",
     budget: "", performance: "",
   },
+  {
+    id: "ch-networks", name: "Networks", emoji: "🤝",
+    strategy: "Partner with golf simulators, gifting organizations, and golf outing coordinators. Physical presence meets digital conversion.",
+    targetAudience: "Sim golfers, corporate outing planners, gift buyers, event organizers",
+    contentTypes: "Co-branded materials, event sponsorships, sample kits, QR-to-signup flows",
+    budget: "", performance: "",
+  },
 ];
 
 // ─── OFFERS ─────────────────────────────────────────────────────
@@ -381,6 +388,68 @@ export const OFFERS_DEFAULTS = [
 // ─── INSIGHTS ───────────────────────────────────────────────────
 export const INSIGHTS_DEFAULTS = [];
 
+// ─── CUSTOMER JOURNEY ───────────────────────────────────────────
+export const JOURNEY_STAGES = [
+  { id: "stranger", name: "Stranger", description: "Hasn't heard of Mully yet", color: "#9ca3af", icon: "👤" },
+  { id: "aware", name: "Aware", description: "Seen content, knows the brand exists", color: "#4c9aff", icon: "👀" },
+  { id: "engaged", name: "Engaged", description: "Interacted — clicked, followed, signed up for waitlist", color: "#a855f7", icon: "💬" },
+  { id: "lead", name: "Lead", description: "On email list or entered a funnel (gave contact info)", color: "#f0b429", icon: "📧" },
+  { id: "trial", name: "Trial / First Purchase", description: "Completed first transaction or started trial", color: "#ea580c", icon: "🛒" },
+  { id: "member", name: "Paid Member", description: "Active paying member", color: "#16a34a", icon: "✅" },
+  { id: "advocate", name: "Advocate", description: "Refers others, shares UGC, leaves testimonials", color: "#e04040", icon: "📣" },
+];
+
+export const JOURNEY_DEFAULTS = [
+  {
+    id: "j-1", fromStage: "stranger", toStage: "aware",
+    channels: "Meta, TikTok, YouTube, Networks",
+    trigger: "Sees content / ad / referral mention",
+    metric: "Impressions, Reach",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+  {
+    id: "j-2", fromStage: "aware", toStage: "engaged",
+    channels: "Meta, TikTok, X, Landing Pages",
+    trigger: "Clicks through, follows, engages with content",
+    metric: "CTR, Engagement Rate, Follows",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+  {
+    id: "j-3", fromStage: "engaged", toStage: "lead",
+    channels: "Landing Pages, Email/SMS",
+    trigger: "Signs up for waitlist, enters email, downloads lead magnet",
+    metric: "Lead Capture Rate, Waitlist Signups",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+  {
+    id: "j-4", fromStage: "lead", toStage: "trial",
+    channels: "Email/SMS, Landing Pages, Direct",
+    trigger: "Makes first purchase or starts trial",
+    metric: "Conversion Rate, CAC",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+  {
+    id: "j-5", fromStage: "trial", toStage: "member",
+    channels: "Email/SMS, Direct",
+    trigger: "Converts to paid membership after trial / repeat purchase",
+    metric: "Legacy → Paid Rate, LTV",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+  {
+    id: "j-6", fromStage: "member", toStage: "advocate",
+    channels: "Email/SMS, Direct, Networks",
+    trigger: "Refers friend, posts UGC, leaves review",
+    metric: "Referral Rate, NPS, UGC Count",
+    currentValue: "—", targetValue: "",
+    notes: "",
+  },
+];
+
 // ─── POST-LAUNCH TRACKS ─────────────────────────────────────────
 export const POST_LAUNCH_DEFAULTS = [
   { id: "pl-1", category: "retention", title: "Retargeting campaigns for non-converters", status: "not_started", notes: "" },
@@ -399,10 +468,12 @@ export const CHANNEL_NAMES = {
   meta: "Meta", tiktok: "TikTok", youtube: "YouTube",
   email: "Email/SMS", twitter: "X (Twitter)", linkedin: "LinkedIn",
   direct: "Direct", landing: "Landing Pages", influencers: "Influencers",
+  networks: "Networks",
 };
 
 export const CHANNEL_COLORS = {
   meta: "#4c9aff", tiktok: "#ff0050", youtube: "#ff4444",
   email: "#f0b429", twitter: "#1da1f2", linkedin: "#0077b5",
   direct: "#8f96a8", landing: "#a855f7", influencers: "#f97316",
+  networks: "#0d9488",
 };
