@@ -8,9 +8,21 @@ export default function Distribution() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Distribution Engineering</h2>
-        <p>Prevent random posting — every channel has a strategy, audience, and playbook</p>
+      {/* Hero: channel overview */}
+      <div className="page-hero">
+        <div className="hero-title">Distribution Engineering</div>
+        <div className="hero-subtitle" style={{ marginBottom: 16 }}>Every channel has a strategy, audience, and playbook — no random posting</div>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(channels.items.length, 4)}, 1fr)`, gap: 8 }}>
+          {channels.items.map((ch) => (
+            <div key={ch.id} className="channel-mini">
+              <span className="ch-emoji">{ch.emoji}</span>
+              <div>
+                <div className="ch-name">{ch.name}</div>
+                <div className="ch-kpi">{ch.targetAudience?.split(",")[0] || "—"}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 16 }}>

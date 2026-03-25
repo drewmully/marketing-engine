@@ -10,14 +10,11 @@ export default function FeedbackLoops() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Feedback Loops</h2>
-        <p>Each insight becomes a task — this should feel like a trading desk</p>
-      </div>
-
-      {/* Funnel conversion snapshot */}
-      <div className="card" style={{ marginBottom: 24 }}>
-        <div className="card-label">Funnel Conversion Overview</div>
+      {/* Hero: trading desk */}
+      <div className="page-hero" style={{ marginBottom: 24 }}>
+        <div className="hero-title">Feedback Loops</div>
+        <div className="hero-subtitle" style={{ marginBottom: 16 }}>Each insight becomes a task — learn, adapt, win</div>
+        <div className="card-label">Funnel Conversion Status</div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {FUNNEL_STAGES.map((stage, i) => {
             const rows = funnel.items.filter((r) => r.stage === stage.id);

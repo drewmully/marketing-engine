@@ -15,9 +15,38 @@ export default function OrgAlignment() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Organizational Alignment</h2>
-        <p>This is where most launches break — 4 swimlanes to keep everything on track</p>
+      {/* Hero: swimlane overview */}
+      <div className="page-hero">
+        <div className="hero-title">Organizational Alignment</div>
+        <div className="hero-subtitle" style={{ marginBottom: 16 }}>This is where most launches break — 4 swimlanes keep everything on track</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+          {SWIMLANES.map((lane) => {
+            const laneTasks = tasks.items.filter((t) => t.swimlane === lane.id);
+            const done = laneTasks.filter((t) => t.status === "done" || t.status === "live").length;
+            const pct = laneTasks.length > 0 ? Math.round((done / laneTasks.length) * 100) : 0;
+            const overdue = laneTasks.filter((t) => t.deadline && new Date(t.deadline) < new Date() && t.status !== "done" && t.status !== "live").length;
+            return (
+              <div key={lane.id} style={{
+                padding: 14, borderRadius: "var(--radius-sm)",
+                background: "var(--bg-surface)", border: "1px solid var(--border)", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 22, marginBottom: 4 }}>{lane.emoji}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>{lane.name}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: pct === 100 ? "var(--green)" : "var(--text-primary)" }}>{pct}%</div>
+                <div className="progress-bar" style={{ height: 4, marginTop: 6, marginBottom: 4 }}>
+                  <div className="progress-bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? "var(--green)" : "var(--yellow)" }} />
+                </div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                  {done}/{laneTasks.length} done
+                  {overdue > 0 && <span style={{ color: "var(--accent)", marginLeft: 4 }}>({overdue} overdue)</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: "none" /* replaced by hero */ }}>
       </div>
 
       {SWIMLANES.map((lane) => {

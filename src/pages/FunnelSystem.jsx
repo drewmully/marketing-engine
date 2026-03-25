@@ -14,11 +14,76 @@ export default function FunnelSystem() {
 
   const filtered = activeStage === "all" ? funnel.items : funnel.items.filter((r) => r.stage === activeStage);
 
+  // Stats per stage
+  const stageStats = {};
+  FUNNEL_STAGES.forEach((s) => {
+    const rows = funnel.items.filter((r) => r.stage === s.id);
+    const live = rows.filter((r) => r.status === "live" || r.status === "done").length;
+    stageStats[s.id] = { total: rows.length, live };
+  });
+
   return (
     <div>
-      <div className="page-header">
-        <h2>Funnel System</h2>
-        <p>Each row = one experiment or push inside the funnel</p>
+      {/* Visual funnel hero */}
+      <div className="page-hero">
+        <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
+          {/* Funnel graphic */}
+          <div style={{ flex: "0 0 340px" }}>
+            <div className="hero-title">The Funnel</div>
+            <div className="hero-subtitle" style={{ marginBottom: 16 }}>Move people from awareness to loyalty</div>
+            <div className="funnel-visual">
+              {FUNNEL_STAGES.map((stage, i) => {
+                const widthPct = 100 - (i * 18);
+                const ss = stageStats[stage.id];
+                return (
+                  <div key={stage.id}
+                    className="funnel-stage-bar"
+                    onClick={() => setActiveStage(activeStage === stage.id ? "all" : stage.id)}
+                    style={{
+                      width: `${widthPct}%`,
+                      background: stage.color,
+                      opacity: activeStage === "all" || activeStage === stage.id ? 1 : 0.35,
+                      cursor: "pointer",
+                    }}>
+                    <div className="funnel-stage-info">
+                      <span className="funnel-stage-name">{stage.emoji} {stage.name}</span>
+                      <span className="funnel-stage-kpi">{ss.live}/{ss.total} live</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Key metrics per stage */}
+          <div style={{ flex: 1 }}>
+            <div className="card-label">Stage Focus</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {FUNNEL_STAGES.map((stage) => {
+                const ss = stageStats[stage.id];
+                const pct = ss.total > 0 ? Math.round((ss.live / ss.total) * 100) : 0;
+                return (
+                  <div key={stage.id} style={{
+                    padding: 12, borderRadius: "var(--radius-sm)",
+                    border: `1px solid ${stage.color}30`, background: `${stage.color}08`,
+                    cursor: "pointer", transition: "all 0.15s",
+                    opacity: activeStage === "all" || activeStage === stage.id ? 1 : 0.4,
+                  }}
+                    onClick={() => setActiveStage(activeStage === stage.id ? "all" : stage.id)}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: stage.color }}>{stage.name}</span>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, color: stage.color }}>{pct}%</span>
+                    </div>
+                    <div className="progress-bar" style={{ height: 4 }}>
+                      <div className="progress-bar-fill" style={{ width: `${pct}%`, background: stage.color }} />
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>{stage.description}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stage filter tabs */}

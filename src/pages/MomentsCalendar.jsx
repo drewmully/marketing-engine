@@ -10,11 +10,51 @@ export default function MomentsCalendar() {
   const sorted = [...moments.items].sort((a, b) => new Date(a.date) - new Date(b.date));
   const now = new Date();
 
+  // Status summary
+  const done = sorted.filter((m) => m.status === "done" || m.status === "live").length;
+  const upcoming = sorted.filter((m) => {
+    const d = new Date(m.date);
+    return d >= now && m.status !== "done" && m.status !== "live";
+  }).length;
+  const next = sorted.find((m) => new Date(m.date) >= now && m.status !== "done");
+
   return (
     <div>
-      <div className="page-header">
-        <h2>Moments Calendar</h2>
-        <p>Every campaign moment orchestrated — "something is always happening"</p>
+      {/* Hero: timeline overview */}
+      <div className="page-hero">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div className="hero-title">Campaign Moments</div>
+            <div className="hero-subtitle">Every key moment orchestrated — "something is always happening"</div>
+          </div>
+          <div style={{ display: "flex", gap: 20, textAlign: "center" }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--green)" }}>{done}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Complete</div>
+            </div>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--yellow)" }}>{upcoming}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Upcoming</div>
+            </div>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)" }}>{sorted.length}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total</div>
+            </div>
+          </div>
+        </div>
+        {next && (
+          <div style={{
+            marginTop: 14, padding: "10px 14px", borderRadius: "var(--radius-sm)",
+            background: "var(--accent-soft)", border: "1px solid var(--accent-border)",
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <span style={{ fontSize: 10, color: "var(--accent)", fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase" }}>NEXT UP</span>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>{next.name}</span>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              — {new Date(next.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Timeline view */}

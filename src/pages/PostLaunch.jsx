@@ -16,8 +16,31 @@ export default function PostLaunch() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Post-Launch Engine</h2>
+      {/* Hero */}
+      <div className="page-hero">
+        <div className="hero-title">Post-Launch Engine</div>
+        <div className="hero-subtitle" style={{ marginBottom: 16 }}>This is where you win long-term</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+          {CATEGORIES.map((cat) => {
+            const items = postLaunch.items.filter((i) => i.category === cat.id);
+            const done = items.filter((i) => i.status === "done" || i.status === "live").length;
+            return (
+              <div key={cat.id} style={{
+                padding: 14, borderRadius: "var(--radius-sm)", textAlign: "center",
+                background: `${cat.color}08`, border: `1px solid ${cat.color}20`,
+              }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{cat.emoji}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: cat.color }}>{cat.name}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", marginTop: 4 }}>
+                  {done}/{items.length}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: "none" /* old header replaced by hero */ }}>
         <p>This is where you win long-term — retention, referrals, UGC, and social proof</p>
       </div>
 

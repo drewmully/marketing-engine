@@ -29,36 +29,56 @@ export default function CreativeSystem() {
   const angleCount = {};
   creatives.items.forEach((c) => { angleCount[c.angle] = (angleCount[c.angle] || 0) + 1; });
 
+  // Format counts
+  const formatCount = {};
+  creatives.items.forEach((c) => { formatCount[c.format] = (formatCount[c.format] || 0) + 1; });
+  const done = creatives.items.filter((c) => c.status === "done" || c.status === "live").length;
+
   return (
     <div>
-      <div className="page-header">
-        <h2>Creative System</h2>
-        <p>1 idea → 20+ executions — scale your content factory</p>
-      </div>
-
-      {/* Core idea + angles */}
-      <div className="grid-2" style={{ marginBottom: 24 }}>
-        <div className="card">
-          <div className="card-label">Core Idea</div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
-            {campaign.coreIdea}
+      {/* Hero: content factory visual */}
+      <div className="page-hero">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ flex: 1 }}>
+            <div className="hero-title">Creative System</div>
+            <div className="hero-subtitle" style={{ marginBottom: 16 }}>1 idea → {creatives.items.length} executions — scale your content factory</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--accent)", marginBottom: 12 }}>
+              "{campaign.coreIdea}"
+            </div>
+            {/* Angle pills */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {CREATIVE_ANGLES.map((a) => (
+                <span key={a} className="hashtag" style={{
+                  fontSize: 11, padding: "3px 10px", cursor: "pointer",
+                  background: filterAngle === a ? "var(--accent)" : "var(--accent-soft)",
+                  color: filterAngle === a ? "white" : "var(--accent)",
+                }}
+                  onClick={() => setFilterAngle(filterAngle === a ? "all" : a)}>
+                  {a} ({angleCount[a] || 0})
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="card">
-          <div className="card-label">Angles / Variations</div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {CREATIVE_ANGLES.map((a) => (
-              <span key={a} className="hashtag" style={{
-                fontSize: 12, padding: "4px 10px",
-                cursor: "pointer",
-                background: filterAngle === a ? "var(--accent)" : "var(--accent-soft)",
-                color: filterAngle === a ? "white" : "var(--accent)",
+          {/* Stats */}
+          <div style={{ display: "flex", gap: 16, flexShrink: 0, marginLeft: 24 }}>
+            {FORMATS.map((f) => (
+              <div key={f.value} style={{
+                textAlign: "center", padding: "10px 12px", borderRadius: "var(--radius-sm)",
+                background: `${f.color}08`, border: `1px solid ${f.color}20`,
+                cursor: "pointer", opacity: filterFormat === "all" || filterFormat === f.value ? 1 : 0.4,
+                transition: "opacity 0.15s",
               }}
-                onClick={() => setFilterAngle(filterAngle === a ? "all" : a)}>
-                {a}
-                <span style={{ marginLeft: 4, opacity: 0.6 }}>({angleCount[a] || 0})</span>
-              </span>
+                onClick={() => setFilterFormat(filterFormat === f.value ? "all" : f.value)}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: f.color }}>
+                  {formatCount[f.value] || 0}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
+              </div>
             ))}
+            <div style={{ textAlign: "center", padding: "10px 12px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--green)" }}>{done}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Done</div>
+            </div>
           </div>
         </div>
       </div>

@@ -2,10 +2,11 @@ import { useState } from "react";
 import { HashRouter, Routes, Route, NavLink } from "react-router-dom";
 import {
   LayoutDashboard, Filter, Calendar, Building2, Palette,
-  Radio, RefreshCcw, Tag, Rocket, Lock, Unlock, Eye,
+  Radio, RefreshCcw, Tag, Rocket, Lock, Unlock, Eye, Sun, Moon,
 } from "lucide-react";
 import { CampaignProvider } from "./context/CampaignContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import MissionControl from "./pages/MissionControl";
 import FunnelSystem from "./pages/FunnelSystem";
 import MomentsCalendar from "./pages/MomentsCalendar";
@@ -64,24 +65,31 @@ function LoginModal({ onClose }) {
 
 function TopBar() {
   const { isEditMode, logout } = useAuth();
+  const { theme, toggle } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   return (
     <>
       <div className="top-bar">
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!isEditMode && (
             <div className="view-mode-banner"><Eye size={14} /> View only</div>
           )}
         </div>
-        {isEditMode ? (
-          <button className="edit-toggle active" onClick={logout}>
-            <Unlock size={14} /> Edit Mode
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button className="theme-toggle" onClick={toggle} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            {theme === "dark" ? "Light" : "Dark"}
           </button>
-        ) : (
-          <button className="edit-toggle" onClick={() => setShowLogin(true)}>
-            <Lock size={14} /> Log In to Edit
-          </button>
-        )}
+          {isEditMode ? (
+            <button className="edit-toggle active" onClick={logout}>
+              <Unlock size={14} /> Edit Mode
+            </button>
+          ) : (
+            <button className="edit-toggle" onClick={() => setShowLogin(true)}>
+              <Lock size={14} /> Log In to Edit
+            </button>
+          )}
+        </div>
       </div>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
@@ -142,12 +150,14 @@ function AppShell() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CampaignProvider>
-        <HashRouter>
-          <AppShell />
-        </HashRouter>
-      </CampaignProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CampaignProvider>
+          <HashRouter>
+            <AppShell />
+          </HashRouter>
+        </CampaignProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

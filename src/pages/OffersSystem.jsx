@@ -15,11 +15,32 @@ export default function OffersSystem() {
     else byStage.awareness.push(o); // fallback
   });
 
+  const live = offers.items.filter((o) => o.status === "live" || o.status === "done").length;
+
   return (
     <div>
-      <div className="page-header">
-        <h2>Offers System</h2>
-        <p>Treat offers like products — each one has a value stack, audience, and funnel position</p>
+      {/* Hero */}
+      <div className="page-hero">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div className="hero-title">Offers System</div>
+            <div className="hero-subtitle">Treat offers like products — value stack, audience, funnel position</div>
+          </div>
+          <div style={{ display: "flex", gap: 16, textAlign: "center" }}>
+            {FUNNEL_STAGES.map((s) => (
+              <div key={s.id} style={{ padding: "6px 12px", borderRadius: "var(--radius-sm)", background: `${s.color}08`, border: `1px solid ${s.color}20` }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: s.color }}>
+                  {byStage[s.id]?.length || 0}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase" }}>{s.name}</div>
+              </div>
+            ))}
+            <div style={{ padding: "6px 12px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--green)" }}>{live}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase" }}>Live</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 16 }}>
