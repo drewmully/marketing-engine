@@ -27,17 +27,17 @@ export default function MomentsCalendar() {
             <div className="hero-title">Campaign Moments</div>
             <div className="hero-subtitle">Every key moment orchestrated — "something is always happening"</div>
           </div>
-          <div style={{ display: "flex", gap: 20, textAlign: "center" }}>
-            <div>
+          <div style={{ display: "flex", gap: 12, textAlign: "center" }}>
+            <div className="kpi-item" style={{ "--kpi-color": "var(--green)", padding: "10px 18px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--green)" }}>{done}</div>
               <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Complete</div>
             </div>
-            <div>
+            <div className="kpi-item" style={{ "--kpi-color": "var(--yellow)", padding: "10px 18px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--yellow)" }}>{upcoming}</div>
               <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Upcoming</div>
             </div>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)" }}>{sorted.length}</div>
+            <div className="kpi-item" style={{ "--kpi-color": "var(--blue)", padding: "10px 18px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--blue)" }}>{sorted.length}</div>
               <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total</div>
             </div>
           </div>

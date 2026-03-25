@@ -1,5 +1,6 @@
 import { useCampaign } from "../context/CampaignContext";
 import { useAuth } from "../context/AuthContext";
+import { CHANNEL_COLORS } from "../data/campaignData";
 import { EditableText, EditableTextarea } from "../components/EditableField";
 
 export default function Distribution() {
@@ -14,10 +15,12 @@ export default function Distribution() {
         <div className="hero-subtitle" style={{ marginBottom: 16 }}>Every channel has a strategy, audience, and playbook — no random posting</div>
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(channels.items.length, 4)}, 1fr)`, gap: 8 }}>
           {channels.items.map((ch) => (
-            <div key={ch.id} className="channel-mini">
+            <div key={ch.id} className="channel-mini" style={{
+              borderLeft: `3px solid ${CHANNEL_COLORS[ch.id] || "var(--border)"}`,
+            }}>
               <span className="ch-emoji">{ch.emoji}</span>
               <div>
-                <div className="ch-name">{ch.name}</div>
+                <div className="ch-name" style={{ color: CHANNEL_COLORS[ch.id] || "var(--text-primary)" }}>{ch.name}</div>
                 <div className="ch-kpi">{ch.targetAudience?.split(",")[0] || "—"}</div>
               </div>
             </div>
@@ -27,15 +30,19 @@ export default function Distribution() {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 16 }}>
         {channels.items.map((ch) => (
-          <div key={ch.id} className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div key={ch.id} className="channel-detail-card">
+            <div className="channel-detail-header" style={{
+              background: `${CHANNEL_COLORS[ch.id] || "#999"}0a`,
+              borderBottom: `2px solid ${CHANNEL_COLORS[ch.id] || "var(--border)"}`,
+            }}>
               <span style={{ fontSize: 22 }}>{ch.emoji}</span>
               <div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, color: CHANNEL_COLORS[ch.id] || "var(--text-primary)" }}>
                   {ch.name}
                 </div>
               </div>
             </div>
+            <div style={{ padding: "var(--space-lg)" }}>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
@@ -70,6 +77,7 @@ export default function Distribution() {
                     placeholder="Current results..." />
                 </div>
               </div>
+            </div>
             </div>
           </div>
         ))}

@@ -45,22 +45,22 @@ export default function FeedbackLoops() {
 
       {/* Quick stats */}
       <div className="grid-3" style={{ marginBottom: 24 }}>
-        <div className="card" style={{ textAlign: "center", padding: 16 }}>
-          <div className="card-label">Top Creatives</div>
+        <div className="exec-stat-card" style={{ "--exec-color": "var(--green)", textAlign: "center", padding: 16 }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--green)" }}>Top Creatives</div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--green)" }}>
             {creatives.items.filter((c) => c.performance).length}
           </div>
           <div style={{ fontSize: 10, color: "var(--text-muted)" }}>with performance data</div>
         </div>
-        <div className="card" style={{ textAlign: "center", padding: 16 }}>
-          <div className="card-label">Active Insights</div>
+        <div className="exec-stat-card" style={{ "--exec-color": "var(--blue)", textAlign: "center", padding: 16 }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--blue)" }}>Active Insights</div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--blue)" }}>
             {insights.items.length}
           </div>
           <div style={{ fontSize: 10, color: "var(--text-muted)" }}>logged</div>
         </div>
-        <div className="card" style={{ textAlign: "center", padding: 16 }}>
-          <div className="card-label">Tasks Generated</div>
+        <div className="exec-stat-card" style={{ "--exec-color": "var(--yellow)", textAlign: "center", padding: 16 }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--yellow)" }}>Tasks Generated</div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--yellow)" }}>
             {insights.items.filter((i) => i.actionTask).length}
           </div>
@@ -76,7 +76,7 @@ export default function FeedbackLoops() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {insights.items.map((insight) => (
-          <div key={insight.id} className="card" style={{ padding: 16 }}>
+          <div key={insight.id} className="insight-card">
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
               <div style={{
                 width: 28, height: 28, borderRadius: "50%",

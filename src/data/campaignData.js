@@ -234,10 +234,10 @@ export const MOMENTS_DEFAULTS = [
 
 // ─── TASKS (Org Alignment) ──────────────────────────────────────
 export const SWIMLANES = [
-  { id: "product", name: "Product", emoji: "📦" },
-  { id: "customer-service", name: "Customer Service", emoji: "🎧" },
-  { id: "sales-growth", name: "Sales / Growth", emoji: "📈" },
-  { id: "ops-fulfillment", name: "Ops / Fulfillment", emoji: "🚛" },
+  { id: "product", name: "Product", emoji: "📦", color: "#4c9aff" },
+  { id: "customer-service", name: "Customer Service", emoji: "🎧", color: "#a855f7" },
+  { id: "sales-growth", name: "Sales / Growth", emoji: "📈", color: "#16a34a" },
+  { id: "ops-fulfillment", name: "Ops / Fulfillment", emoji: "🚛", color: "#f0b429" },
 ];
 
 export const TASKS_DEFAULTS = [

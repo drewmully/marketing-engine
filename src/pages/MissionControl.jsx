@@ -4,6 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import { EditableText } from "../components/EditableField";
 import { FUNNEL_STAGES } from "../data/campaignData";
 
+const STORY_STAGE_COLORS = ["#4c9aff", "#f0b429", "#a855f7", "#e04040", "#16a34a"];
+const EXEC_COLORS = ["#4c9aff", "#f0b429", "#a855f7", "#e04040", "#0d9488"];
+const KPI_COLORS = ["#4c9aff", "#a855f7", "#e04040", "#16a34a"];
+
 function Countdown({ targetDate }) {
   const [tl, setTl] = useState(calc(targetDate));
   useEffect(() => {
@@ -62,7 +66,6 @@ export default function MissionControl() {
   const { campaign, updateCampaign, updateKPI, stats, moments } = useCampaign();
   const { isEditMode } = useAuth();
 
-  // Find active moments (upcoming within 7 days or today)
   const now = new Date();
   const activeMoments = moments.items
     .filter((m) => {
@@ -72,7 +75,6 @@ export default function MissionControl() {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Overall progress
   const allItems = [...(stats.funnel ? [stats.funnel] : []), ...(stats.tasks ? [stats.tasks] : []), ...(stats.creatives ? [stats.creatives] : [])];
   const totalTasks = allItems.reduce((a, s) => a + s.total, 0);
   const totalDone = allItems.reduce((a, s) => a + (s.done || 0) + (s.live || 0), 0);
@@ -82,8 +84,8 @@ export default function MissionControl() {
     <div>
       {/* Row 1: Story + Core Idea */}
       <div className="grid-2" style={{ marginBottom: 20 }}>
-        <div className="card">
-          <div className="card-label">The Story</div>
+        <div className="card card-accent" style={{ "--card-accent-color": "#4c9aff" }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "#4c9aff" }}>The Story</div>
           {isEditMode ? (
             <textarea className="task-notes" value={campaign.story} rows={3}
               onChange={(e) => updateCampaign({ story: e.target.value })}
@@ -92,8 +94,8 @@ export default function MissionControl() {
             <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.7 }}>{campaign.story}</p>
           )}
         </div>
-        <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div className="card-label">Core Idea</div>
+        <div className="card card-accent" style={{ "--card-accent-color": "var(--accent)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--accent)" }}>Core Idea</div>
           {isEditMode ? (
             <input className="inf-input" value={campaign.coreIdea}
               onChange={(e) => updateCampaign({ coreIdea: e.target.value })}
@@ -109,10 +111,10 @@ export default function MissionControl() {
       {/* Row 2: KPIs + Progress */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 200px", gap: 16, marginBottom: 20 }}>
         <div className="card">
-          <div className="card-label">Primary KPIs</div>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${campaign.primaryKPIs.length}, 1fr)`, gap: 16 }}>
-            {campaign.primaryKPIs.map((kpi) => (
-              <div key={kpi.id} style={{ textAlign: "center" }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--purple)" }}>Primary KPIs</div>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${campaign.primaryKPIs.length}, 1fr)`, gap: 12 }}>
+            {campaign.primaryKPIs.map((kpi, idx) => (
+              <div key={kpi.id} className="kpi-item" style={{ "--kpi-color": KPI_COLORS[idx % KPI_COLORS.length] }}>
                 <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
                   {kpi.name}
                 </div>
@@ -147,13 +149,14 @@ export default function MissionControl() {
             ))}
           </div>
         </div>
-        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div className="card progress-overall">
           <div style={{ position: "relative" }}>
             <ProgressRing pct={overallPct} size={80} stroke={6}
-              color={overallPct === 100 ? "var(--green)" : "var(--accent)"} />
+              color={overallPct === 100 ? "var(--green)" : overallPct > 50 ? "var(--blue)" : "var(--accent)"} />
             <div style={{
               position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700,
+              color: overallPct === 100 ? "var(--green)" : overallPct > 50 ? "var(--blue)" : "var(--accent)",
             }}>{overallPct}%</div>
           </div>
           <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -164,16 +167,16 @@ export default function MissionControl() {
 
       {/* Row 3: Funnel snapshot + Active Moments */}
       <div className="grid-2" style={{ marginBottom: 20 }}>
-        <div className="card">
-          <div className="card-label">Funnel Snapshot</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="card card-accent" style={{ "--card-accent-color": "var(--blue)" }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--blue)" }}>Funnel Snapshot</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {FUNNEL_STAGES.map((stage) => (
               <FunnelSnapshotRow key={stage.id} stage={stage} />
             ))}
           </div>
         </div>
-        <div className="card">
-          <div className="card-label">Active Moments</div>
+        <div className="card card-accent" style={{ "--card-accent-color": "var(--yellow)" }}>
+          <div className="card-label-color" style={{ "--card-accent-color": "var(--yellow)" }}>Active Moments</div>
           {activeMoments.length === 0 ? (
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No upcoming moments in the next 7 days</p>
           ) : (
@@ -181,15 +184,12 @@ export default function MissionControl() {
               {activeMoments.map((m) => {
                 const d = new Date(m.date);
                 const daysOut = Math.ceil((d - now) / 86400000);
+                const momentColor = daysOut <= 0 ? "var(--accent)" : daysOut <= 2 ? "var(--yellow)" : "var(--blue)";
                 return (
-                  <div key={m.id} style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    padding: "10px 12px", background: "var(--bg-surface)", borderRadius: "var(--radius-sm)",
-                    border: "1px solid var(--border)",
-                  }}>
+                  <div key={m.id} className="moment-active-card" style={{ "--moment-color": momentColor }}>
                     <div style={{
                       fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, minWidth: 36, textAlign: "center",
-                      color: daysOut <= 0 ? "var(--accent)" : daysOut <= 2 ? "var(--yellow)" : "var(--text-secondary)",
+                      color: momentColor,
                     }}>
                       {daysOut <= 0 ? "NOW" : `${daysOut}d`}
                     </div>
@@ -203,7 +203,7 @@ export default function MissionControl() {
             </div>
           )}
           <div style={{ marginTop: 12 }}>
-            <div className="card-label" style={{ marginBottom: 8 }}>Countdown</div>
+            <div className="card-label-color" style={{ "--card-accent-color": "var(--accent)", marginBottom: 8 }}>Countdown</div>
             <Countdown targetDate={campaign.launchDate} />
           </div>
         </div>
@@ -211,22 +211,18 @@ export default function MissionControl() {
 
       {/* Row 4: Story Arc */}
       <div className="card" style={{ marginBottom: 20 }}>
-        <div className="card-label">Story Arc</div>
-        <div style={{ display: "flex", gap: 2 }}>
+        <div className="card-label-color" style={{ "--card-accent-color": "var(--purple)" }}>Story Arc</div>
+        <div style={{ display: "flex", gap: 6 }}>
           {(campaign.storyStages || []).map((stage, i) => (
-            <div key={stage.id} style={{
-              flex: 1, padding: "12px 14px",
-              background: "var(--bg-surface)", borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border)",
-            }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+            <div key={stage.id} className="story-stage" style={{ "--stage-color": STORY_STAGE_COLORS[i] }}>
+              <div className="stage-num" style={{ color: STORY_STAGE_COLORS[i] }}>
                 Stage {i + 1}
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>
                 {stage.name}
               </div>
               <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 6 }}>{stage.message}</div>
-              <div style={{ fontSize: 10, color: "var(--accent)", fontStyle: "italic" }}>
+              <div style={{ fontSize: 10, color: STORY_STAGE_COLORS[i], fontStyle: "italic", fontWeight: 500 }}>
                 "{stage.keyLines[0]}"
               </div>
             </div>
@@ -234,18 +230,21 @@ export default function MissionControl() {
         </div>
       </div>
 
-      {/* Row 5: Quick stats across all areas */}
-      <div className="card-label">Execution Overview</div>
+      {/* Row 5: Execution Overview */}
+      <div className="section-header">
+        <div className="section-dot" style={{ background: "var(--teal)" }} />
+        <div className="section-title">Execution Overview</div>
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
         {[
-          { label: "Funnel Rows", s: stats.funnel },
-          { label: "Tasks", s: stats.tasks },
-          { label: "Creatives", s: stats.creatives },
-          { label: "Moments", s: stats.moments },
-          { label: "Offers", s: stats.offers },
-        ].map(({ label, s }) => (
-          <div key={label} className="card" style={{ padding: 14, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{label}</div>
+          { label: "Funnel Rows", s: stats.funnel, color: EXEC_COLORS[0] },
+          { label: "Tasks", s: stats.tasks, color: EXEC_COLORS[1] },
+          { label: "Creatives", s: stats.creatives, color: EXEC_COLORS[2] },
+          { label: "Moments", s: stats.moments, color: EXEC_COLORS[3] },
+          { label: "Offers", s: stats.offers, color: EXEC_COLORS[4] },
+        ].map(({ label, s, color }) => (
+          <div key={label} className="exec-stat-card" style={{ "--exec-color": color }}>
+            <div style={{ fontSize: 10, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, fontWeight: 600 }}>{label}</div>
             <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
               <div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--green)" }}>{(s.done || 0) + (s.live || 0)}</div>
@@ -274,12 +273,16 @@ function FunnelSnapshotRow({ stage }) {
   const pct = rows.length > 0 ? Math.round((done / rows.length) * 100) : 0;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ width: 16, fontSize: 14 }}>{stage.emoji}</div>
+    <div className="funnel-snapshot-row">
+      <div style={{
+        width: 28, height: 28, borderRadius: "var(--radius-sm)",
+        background: `${stage.color}18`, display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 14,
+      }}>{stage.emoji}</div>
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{stage.name}</span>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{done}/{rows.length}</span>
+          <span style={{ fontSize: 11, color: stage.color, fontWeight: 600 }}>{done}/{rows.length}</span>
         </div>
         <div className="progress-bar">
           <div className="progress-bar-fill" style={{ width: `${pct}%`, background: stage.color }} />

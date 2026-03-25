@@ -28,10 +28,11 @@ export default function OrgAlignment() {
             return (
               <div key={lane.id} style={{
                 padding: 14, borderRadius: "var(--radius-sm)",
-                background: "var(--bg-surface)", border: "1px solid var(--border)", textAlign: "center",
+                background: `${lane.color}06`, border: `1px solid ${lane.color}20`, textAlign: "center",
+                borderTop: `3px solid ${lane.color}`,
               }}>
                 <div style={{ fontSize: 22, marginBottom: 4 }}>{lane.emoji}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>{lane.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: lane.color, marginBottom: 6 }}>{lane.name}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: pct === 100 ? "var(--green)" : "var(--text-primary)" }}>{pct}%</div>
                 <div className="progress-bar" style={{ height: 4, marginTop: 6, marginBottom: 4 }}>
                   <div className="progress-bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? "var(--green)" : "var(--yellow)" }} />
@@ -58,15 +59,15 @@ export default function OrgAlignment() {
           <div key={lane.id} style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 16 }}>{lane.emoji}</span>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-primary)" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, letterSpacing: "0.06em", color: lane.color }}>
                 {lane.name}
               </span>
               <span style={{ fontSize: 11, color: "var(--text-muted)" }}>— {done}/{laneTasks.length} complete</span>
               <div style={{ flex: 1 }} />
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: pct === 100 ? "var(--green)" : "var(--text-muted)" }}>{pct}%</span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: pct === 100 ? "var(--green)" : lane.color }}>{pct}%</span>
             </div>
             <div className="progress-bar" style={{ marginBottom: 12 }}>
-              <div className="progress-bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? "var(--green)" : "var(--yellow)" }} />
+              <div className="progress-bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? "var(--green)" : lane.color }} />
             </div>
 
             <table className="tracker-table">

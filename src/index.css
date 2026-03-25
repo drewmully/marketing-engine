@@ -23,6 +23,10 @@
   --blue: #4c9aff;
   --blue-soft: rgba(76, 154, 255, 0.12);
   --orange: #f08c40;
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, 0.12);
+  --teal: #2dd4bf;
+  --teal-soft: rgba(45, 212, 191, 0.12);
 
   /* Text — warm grays with good contrast */
   --text-primary: #e8ecf4;
@@ -68,6 +72,10 @@
   --blue: #2563eb;
   --blue-soft: rgba(37, 99, 235, 0.08);
   --orange: #ea580c;
+  --purple: #7c3aed;
+  --purple-soft: rgba(124, 58, 237, 0.08);
+  --teal: #0d9488;
+  --teal-soft: rgba(13, 148, 136, 0.08);
 
   --text-primary: #1a1d28;
   --text-secondary: #4b5563;
@@ -891,3 +899,250 @@ h1, h2, h3, h4, h5, h6 {
 .channel-mini .ch-emoji { font-size: 18px; }
 .channel-mini .ch-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
 .channel-mini .ch-kpi { font-size: 11px; color: var(--text-muted); }
+
+/* ─── COLOR ACCENTS FOR SCANABILITY ─── */
+
+/* Cards with colored left border */
+.card-accent {
+  border-left: 3px solid var(--card-accent-color, var(--border));
+}
+
+/* Colored card label — uses parent's --card-accent-color */
+.card-label-color {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+  color: var(--card-accent-color, var(--text-muted));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Section header with color dot */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-md);
+}
+.section-header .section-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.section-header .section-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Story arc stage with colored top border */
+.story-stage {
+  flex: 1;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--stage-color, var(--border));
+  transition: all 0.15s;
+}
+.story-stage:hover {
+  border-color: var(--border-light);
+  border-top-color: var(--stage-color, var(--border-light));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.story-stage .stage-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--stage-color, var(--text-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+/* Execution stat card with colored top strip */
+.exec-stat-card {
+  padding: 14px;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  border-top: 3px solid var(--exec-color, var(--border));
+  transition: all 0.15s;
+}
+.exec-stat-card:hover {
+  border-color: var(--border-light);
+  border-top-color: var(--exec-color, var(--border-light));
+}
+
+/* KPI card with colored indicator */
+.kpi-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.kpi-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background: var(--kpi-color, var(--accent));
+  border-radius: 0 0 2px 2px;
+}
+
+/* Active moment card with colored side */
+.moment-active-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--moment-color, var(--blue));
+  transition: all 0.15s;
+}
+.moment-active-card:hover {
+  background: var(--bg-card-hover);
+}
+
+/* Sidebar section labels — colored */
+[data-theme="light"] .sidebar-section-label { font-weight: 600; }
+.sidebar-section-label {
+  padding: 10px 18px 4px;
+  font-size: 9px;
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sidebar-section-label.engine { color: var(--blue); }
+.sidebar-section-label.create { color: var(--purple); }
+.sidebar-section-label.optimize { color: var(--teal); }
+
+/* Funnel snapshot with colored background tint */
+.funnel-snapshot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.funnel-snapshot-row:hover { background: var(--bg-card-hover); }
+
+/* Countdown colored digits */
+[data-theme="light"] .countdown-unit .number {
+  color: var(--accent);
+}
+
+/* Progress ring overall label */
+.progress-overall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hero sections — subtle gradient background */
+[data-theme="light"] .page-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+  border-color: var(--border);
+}
+
+/* Card hover lift */
+[data-theme="light"] .card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Colored icon wrapper */
+.icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon-badge svg { width: 16px; height: 16px; }
+
+/* Swimlane colored cards */
+.swimlane-card {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--lane-color, var(--border));
+}
+
+/* Channel card colored top */
+.channel-detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.channel-detail-header {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Offer card with stage-colored side */
+.offer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--offer-color, var(--accent));
+  padding: var(--space-lg);
+  transition: all 0.15s;
+}
+.offer-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Insight card with colored indicator */
+.insight-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  border-left: 3px solid var(--teal);
+  transition: all 0.15s;
+}
+.insight-card:hover {
+  border-color: var(--border-light);
+  border-left-color: var(--teal);
+}
+
+/* Post-launch category with color */
+.postlaunch-category {
+  margin-bottom: var(--space-xl);
+}
+.postlaunch-category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

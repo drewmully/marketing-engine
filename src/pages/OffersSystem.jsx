@@ -47,8 +47,8 @@ export default function OffersSystem() {
         {offers.items.map((offer) => {
           const stage = FUNNEL_STAGES.find((s) => s.id === offer.funnelStage);
           return (
-            <div key={offer.id} className="card" style={{
-              borderTop: `3px solid ${stage?.color || "var(--border)"}`,
+            <div key={offer.id} className="offer-card" style={{
+              "--offer-color": stage?.color || "var(--accent)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                 <div>

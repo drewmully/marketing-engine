@@ -30,9 +30,9 @@ const NAV = [
 ];
 
 const SECTIONS = {
-  engine: "CORE ENGINE",
-  create: "CREATE & DISTRIBUTE",
-  optimize: "OPTIMIZE & GROW",
+  engine: { label: "CORE ENGINE", cls: "engine" },
+  create: { label: "CREATE & DISTRIBUTE", cls: "create" },
+  optimize: { label: "OPTIMIZE & GROW", cls: "optimize" },
 };
 
 function LoginModal({ onClose }) {
@@ -112,13 +112,8 @@ function AppShell() {
             return (
               <li key={path}>
                 {showDivider && (
-                  <div style={{
-                    padding: "10px 18px 4px",
-                    fontSize: 9, fontFamily: "var(--font-display)",
-                    color: "var(--text-faint)", letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                  }}>
-                    {SECTIONS[section]}
+                  <div className={`sidebar-section-label ${SECTIONS[section].cls}`}>
+                    {SECTIONS[section].label}
                   </div>
                 )}
                 <NavLink to={path} end={path === "/"}>
