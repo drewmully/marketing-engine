@@ -1,44 +1,24 @@
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { PHASES, STORYBOARD, INFLUENCERS } from "../data/campaignData";
+import {
+  CAMPAIGN_DEFAULTS, FUNNEL_ROWS_DEFAULTS, MOMENTS_DEFAULTS,
+  TASKS_DEFAULTS, CREATIVES_DEFAULTS, CHANNELS_DEFAULTS,
+  OFFERS_DEFAULTS, INSIGHTS_DEFAULTS, POST_LAUNCH_DEFAULTS,
+} from "../data/campaignData";
 import { getValue, setValue } from "../lib/supabase";
 
 const CampaignContext = createContext();
 
-function buildInitialTaskStatuses() {
-  const statuses = {};
-  PHASES.forEach((phase) => {
-    Object.values(phase.channels).forEach((channel) => {
-      channel.tasks.forEach((task) => {
-        statuses[task.id] = task.status;
-      });
-    });
-  });
-  STORYBOARD.forEach((scene) => {
-    statuses[scene.id] = scene.status;
-  });
-  return statuses;
-}
-
-const DEFAULTS = {
-  taskStatuses: buildInitialTaskStatuses(),
-  influencers: INFLUENCERS,
-  notes: {},
-};
-
-// Persist to both localStorage (instant) and Supabase (durable)
+// Persist to localStorage + Supabase (debounced)
 function usePersistedState(key, defaultValue) {
   const [state, setState] = useState(() => {
     try {
       const stored = localStorage.getItem(`mully-${key}`);
       return stored ? JSON.parse(stored) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
+    } catch { return defaultValue; }
   });
   const [loaded, setLoaded] = useState(false);
   const debounceRef = useRef(null);
 
-  // Load from Supabase on mount (overrides localStorage if available)
   useEffect(() => {
     getValue(key).then((remote) => {
       if (remote !== null) {
@@ -49,119 +29,95 @@ function usePersistedState(key, defaultValue) {
     });
   }, [key]);
 
-  const update = useCallback(
-    (valueOrFn) => {
-      setState((prev) => {
-        const next = typeof valueOrFn === "function" ? valueOrFn(prev) : valueOrFn;
-        localStorage.setItem(`mully-${key}`, JSON.stringify(next));
-        // Debounce Supabase writes to avoid spamming
-        clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => setValue(key, next), 500);
-        return next;
-      });
-    },
-    [key]
-  );
+  const update = useCallback((valueOrFn) => {
+    setState((prev) => {
+      const next = typeof valueOrFn === "function" ? valueOrFn(prev) : valueOrFn;
+      localStorage.setItem(`mully-${key}`, JSON.stringify(next));
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => setValue(key, next), 500);
+      return next;
+    });
+  }, [key]);
 
   return [state, update, loaded];
 }
 
+// Generic CRUD helpers for list-based entities
+function useEntityList(key, defaults) {
+  const [items, setItems, loaded] = usePersistedState(key, defaults);
+
+  const add = useCallback((item) => {
+    setItems((prev) => [...prev, { ...item, id: `${key}-${Date.now()}` }]);
+  }, [setItems, key]);
+
+  const update = useCallback((id, updates) => {
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...updates } : it)));
+  }, [setItems]);
+
+  const remove = useCallback((id) => {
+    setItems((prev) => prev.filter((it) => it.id !== id));
+  }, [setItems]);
+
+  return { items, setItems, add, update, remove, loaded };
+}
+
 export function CampaignProvider({ children }) {
-  const [taskStatuses, setTaskStatuses, tsLoaded] = usePersistedState("taskStatuses", DEFAULTS.taskStatuses);
-  const [influencers, setInfluencers, infLoaded] = usePersistedState("influencers", DEFAULTS.influencers);
-  const [notes, setNotes, notesLoaded] = usePersistedState("notes", DEFAULTS.notes);
+  // Singleton campaign config
+  const [campaign, setCampaign, campLoaded] = usePersistedState("campaign", CAMPAIGN_DEFAULTS);
 
-  const loaded = tsLoaded && infLoaded && notesLoaded;
+  // Entity lists
+  const funnel = useEntityList("funnelRows", FUNNEL_ROWS_DEFAULTS);
+  const moments = useEntityList("moments", MOMENTS_DEFAULTS);
+  const tasks = useEntityList("tasks", TASKS_DEFAULTS);
+  const creatives = useEntityList("creatives", CREATIVES_DEFAULTS);
+  const channels = useEntityList("channels", CHANNELS_DEFAULTS);
+  const offers = useEntityList("offers", OFFERS_DEFAULTS);
+  const insights = useEntityList("insights", INSIGHTS_DEFAULTS);
+  const postLaunch = useEntityList("postLaunch", POST_LAUNCH_DEFAULTS);
 
-  const updateTaskStatus = useCallback(
-    (taskId, status) => {
-      setTaskStatuses((prev) => ({ ...prev, [taskId]: status }));
-    },
-    [setTaskStatuses]
-  );
+  const loaded = campLoaded && funnel.loaded && moments.loaded && tasks.loaded &&
+    creatives.loaded && channels.loaded && offers.loaded && insights.loaded && postLaunch.loaded;
 
-  const updateInfluencer = useCallback(
-    (id, updates) => {
-      setInfluencers((prev) =>
-        prev.map((inf) => (inf.id === id ? { ...inf, ...updates } : inf))
-      );
-    },
-    [setInfluencers]
-  );
+  const updateCampaign = useCallback((updates) => {
+    setCampaign((prev) => ({ ...prev, ...updates }));
+  }, [setCampaign]);
 
-  const updateNote = useCallback(
-    (taskId, note) => {
-      setNotes((prev) => ({ ...prev, [taskId]: note }));
-    },
-    [setNotes]
-  );
+  const updateKPI = useCallback((kpiId, updates) => {
+    setCampaign((prev) => ({
+      ...prev,
+      primaryKPIs: prev.primaryKPIs.map((k) => (k.id === kpiId ? { ...k, ...updates } : k)),
+    }));
+  }, [setCampaign]);
 
+  // Computed stats
   const stats = useMemo(() => {
-    const allStatuses = Object.values(taskStatuses);
-    const total = allStatuses.length;
-    const done = allStatuses.filter((s) => s === "done").length;
-    const inProgress = allStatuses.filter((s) => s === "in_progress").length;
-    return { total, done, inProgress, notStarted: total - done - inProgress };
-  }, [taskStatuses]);
+    const countByStatus = (items) => {
+      const s = { total: items.length, not_started: 0, in_progress: 0, live: 0, done: 0, iterating: 0 };
+      items.forEach((it) => { if (s[it.status] !== undefined) s[it.status]++; });
+      s.complete = s.done + s.live;
+      return s;
+    };
+    return {
+      funnel: countByStatus(funnel.items),
+      moments: countByStatus(moments.items),
+      tasks: countByStatus(tasks.items),
+      creatives: countByStatus(creatives.items),
+      offers: countByStatus(offers.items),
+      postLaunch: countByStatus(postLaunch.items),
+    };
+  }, [funnel.items, moments.items, tasks.items, creatives.items, offers.items, postLaunch.items]);
 
-  // Compute phase-level stats
-  const phaseStats = useMemo(() => {
-    const result = {};
-    PHASES.forEach((phase) => {
-      const tasks = Object.values(phase.channels).flatMap((ch) => ch.tasks);
-      const total = tasks.length;
-      const done = tasks.filter((t) => taskStatuses[t.id] === "done").length;
-      const inProgress = tasks.filter((t) => taskStatuses[t.id] === "in_progress").length;
-      result[phase.id] = { total, done, inProgress, notStarted: total - done - inProgress };
-    });
-    return result;
-  }, [taskStatuses]);
+  const value = useMemo(() => ({
+    campaign, updateCampaign, updateKPI,
+    funnel, moments, tasks, creatives, channels, offers, insights, postLaunch,
+    stats, loaded,
+  }), [campaign, updateCampaign, updateKPI, funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, stats, loaded]);
 
-  // "Needs attention" — in_progress or not_started tasks, prioritized
-  const needsAttention = useMemo(() => {
-    const items = [];
-    PHASES.forEach((phase) => {
-      Object.entries(phase.channels).forEach(([channelKey, channel]) => {
-        channel.tasks.forEach((task) => {
-          const status = taskStatuses[task.id] || "not_started";
-          if (status === "in_progress") {
-            items.unshift({ ...task, phase, channelKey, status });
-          }
-        });
-      });
-    });
-    // Also include first not_started from each phase
-    PHASES.forEach((phase) => {
-      const allTasks = Object.entries(phase.channels).flatMap(([ck, ch]) =>
-        ch.tasks.map((t) => ({ ...t, phase, channelKey: ck, status: taskStatuses[t.id] || "not_started" }))
-      );
-      const firstNotStarted = allTasks.find((t) => t.status === "not_started");
-      if (firstNotStarted && !items.find((i) => i.id === firstNotStarted.id)) {
-        items.push(firstNotStarted);
-      }
-    });
-    return items.slice(0, 8);
-  }, [taskStatuses]);
-
-  const value = useMemo(
-    () => ({
-      taskStatuses, updateTaskStatus,
-      influencers, updateInfluencer,
-      notes, updateNote,
-      stats, phaseStats, needsAttention, loaded,
-    }),
-    [taskStatuses, updateTaskStatus, influencers, updateInfluencer, notes, updateNote, stats, phaseStats, needsAttention, loaded]
-  );
-
-  return (
-    <CampaignContext.Provider value={value}>
-      {children}
-    </CampaignContext.Provider>
-  );
+  return <CampaignContext.Provider value={value}>{children}</CampaignContext.Provider>;
 }
 
 export function useCampaign() {
   const ctx = useContext(CampaignContext);
-  if (!ctx) throw new Error("useCampaign must be used within CampaignProvider");
+  if (!ctx) throw new Error("useCampaign must be inside CampaignProvider");
   return ctx;
 }

@@ -567,6 +567,28 @@ h1, h2, h3, h4, h5, h6 {
 .inf-input:focus { outline: none; border-color: var(--accent); background: var(--bg-surface); }
 .inf-input:disabled { opacity: 0.7; cursor: default; }
 
+/* Notes textarea */
+.task-notes {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font-body);
+  resize: vertical;
+  min-height: 32px;
+  line-height: 1.5;
+}
+.task-notes:focus { outline: none; border-color: var(--accent); }
+
+/* Moment name style */
+.moment-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
 /* ---- VIRAL HACKS ---- */
 .hack-card {
   background: var(--bg-card);
