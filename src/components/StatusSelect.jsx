@@ -1,4 +1,5 @@
 import { useCampaign } from "../context/CampaignContext";
+import { useAuth } from "../context/AuthContext";
 
 const STATUS_OPTIONS = [
   { value: "not_started", label: "Not Started" },
@@ -8,6 +9,7 @@ const STATUS_OPTIONS = [
 
 export default function StatusSelect({ taskId }) {
   const { taskStatuses, updateTaskStatus } = useCampaign();
+  const { isEditMode } = useAuth();
   const status = taskStatuses[taskId] || "not_started";
 
   return (
@@ -15,19 +17,21 @@ export default function StatusSelect({ taskId }) {
       className="status-select"
       value={status}
       onChange={(e) => updateTaskStatus(taskId, e.target.value)}
+      disabled={!isEditMode}
     >
       {STATUS_OPTIONS.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
       ))}
     </select>
   );
 }
 
-export function StatusBadge({ taskId }) {
-  const { taskStatuses } = useCampaign();
-  const status = taskStatuses[taskId] || "not_started";
+export function StatusBadge({ status }) {
   const labels = { not_started: "Not Started", in_progress: "In Progress", done: "Done" };
-  return <span className={`status-badge ${status}`}>{labels[status]}</span>;
+  return (
+    <span className={`status-badge ${status}`}>
+      <span className={`status-dot ${status}`} />
+      {labels[status]}
+    </span>
+  );
 }

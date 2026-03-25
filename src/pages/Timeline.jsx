@@ -1,4 +1,5 @@
 import { useCampaign } from "../context/CampaignContext";
+import { useAuth } from "../context/AuthContext";
 import { PHASES, CHANNEL_META } from "../data/campaignData";
 import StatusSelect from "../components/StatusSelect";
 
@@ -6,45 +7,41 @@ const CHANNELS = ["email", "linkedin", "twitter", "video"];
 
 export default function Timeline() {
   const { taskStatuses } = useCampaign();
+  const { isEditMode } = useAuth();
 
   return (
     <div>
       <div className="page-header">
         <h2>Campaign Timeline</h2>
-        <p>Swim-lane view — all channels across all phases</p>
+        <p>All channels across all phases — track every deliverable</p>
       </div>
 
       <div
         className="timeline-grid"
-        style={{ gridTemplateColumns: `160px repeat(${PHASES.length}, 1fr)` }}
+        style={{ gridTemplateColumns: `140px repeat(${PHASES.length}, 1fr)` }}
       >
-        {/* Header row */}
-        <div className="timeline-header-cell" style={{ background: "var(--bg-primary)" }}>
-          Channel
-        </div>
-        {PHASES.map((phase) => (
-          <div
-            key={phase.id}
-            className="timeline-header-cell"
-            style={{ borderBottom: `2px solid ${phase.color}`, textAlign: "center" }}
-          >
-            <div style={{ color: phase.color }}>{phase.week}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
-              {phase.label}
+        {/* Header */}
+        <div className="timeline-header-cell" style={{ background: "var(--bg-base)" }}>Channel</div>
+        {PHASES.map((phase) => {
+          return (
+            <div key={phase.id} className="timeline-header-cell">
+              <div style={{ fontSize: 12, color: "var(--text-primary)" }}>{phase.week}</div>
+              <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 2, letterSpacing: "0.08em" }}>
+                {phase.label}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {/* Channel rows */}
+        {/* Rows */}
         {CHANNELS.map((channelKey) => {
           const meta = CHANNEL_META[channelKey];
           return [
             <div key={`label-${channelKey}`} className="timeline-channel-label">
-              <span style={{ color: meta.color }}>{meta.label}</span>
+              <span style={{ color: meta.color, fontSize: 12 }}>{meta.label}</span>
             </div>,
             ...PHASES.map((phase) => {
-              const channel = phase.channels[channelKey];
-              const tasks = channel ? channel.tasks : [];
+              const tasks = phase.channels[channelKey]?.tasks || [];
               return (
                 <div key={`${phase.id}-${channelKey}`} className="timeline-cell">
                   {tasks.map((task) => {
@@ -52,17 +49,15 @@ export default function Timeline() {
                     return (
                       <div key={task.id} className={`timeline-task ${status}`}>
                         <div className="task-title">{task.title}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, marginBottom: isEditMode ? 6 : 0 }}>
                           {task.description}
                         </div>
-                        <StatusSelect taskId={task.id} />
+                        {isEditMode && <StatusSelect taskId={task.id} />}
                       </div>
                     );
                   })}
                   {tasks.length === 0 && (
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
-                      No tasks
-                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-faint)", fontStyle: "italic", padding: 4 }}>—</div>
                   )}
                 </div>
               );
