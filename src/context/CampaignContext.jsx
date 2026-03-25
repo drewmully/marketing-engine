@@ -3,7 +3,7 @@ import {
   CAMPAIGN_DEFAULTS, FUNNEL_ROWS_DEFAULTS, MOMENTS_DEFAULTS,
   TASKS_DEFAULTS, CREATIVES_DEFAULTS, CHANNELS_DEFAULTS,
   OFFERS_DEFAULTS, INSIGHTS_DEFAULTS, POST_LAUNCH_DEFAULTS,
-  JOURNEY_DEFAULTS,
+  JOURNEY_DEFAULTS, CAMPAIGNS_DEFAULTS,
 } from "../data/campaignData";
 import { getValue, setValue } from "../lib/supabase";
 
@@ -76,9 +76,11 @@ export function CampaignProvider({ children }) {
   const insights = useEntityList("insights", INSIGHTS_DEFAULTS);
   const postLaunch = useEntityList("postLaunch", POST_LAUNCH_DEFAULTS);
   const journey = useEntityList("journey", JOURNEY_DEFAULTS);
+  const campaigns = useEntityList("campaigns", CAMPAIGNS_DEFAULTS);
 
   const loaded = campLoaded && funnel.loaded && moments.loaded && tasks.loaded &&
-    creatives.loaded && channels.loaded && offers.loaded && insights.loaded && postLaunch.loaded && journey.loaded;
+    creatives.loaded && channels.loaded && offers.loaded && insights.loaded &&
+    postLaunch.loaded && journey.loaded && campaigns.loaded;
 
   const updateCampaign = useCallback((updates) => {
     setCampaign((prev) => ({ ...prev, ...updates }));
@@ -106,14 +108,15 @@ export function CampaignProvider({ children }) {
       creatives: countByStatus(creatives.items),
       offers: countByStatus(offers.items),
       postLaunch: countByStatus(postLaunch.items),
+      campaigns: countByStatus(campaigns.items),
     };
-  }, [funnel.items, moments.items, tasks.items, creatives.items, offers.items, postLaunch.items]);
+  }, [funnel.items, moments.items, tasks.items, creatives.items, offers.items, postLaunch.items, campaigns.items]);
 
   const value = useMemo(() => ({
     campaign, updateCampaign, updateKPI,
-    funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey,
+    funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey, campaigns,
     stats, loaded,
-  }), [campaign, updateCampaign, updateKPI, funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey, stats, loaded]);
+  }), [campaign, updateCampaign, updateKPI, funnel, moments, tasks, creatives, channels, offers, insights, postLaunch, journey, campaigns, stats, loaded]);
 
   return <CampaignContext.Provider value={value}>{children}</CampaignContext.Provider>;
 }

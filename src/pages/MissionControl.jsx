@@ -5,8 +5,48 @@ import { EditableText } from "../components/EditableField";
 import { FUNNEL_STAGES } from "../data/campaignData";
 
 const STORY_STAGE_COLORS = ["#4c9aff", "#f0b429", "#a855f7", "#e04040", "#16a34a"];
-const EXEC_COLORS = ["#4c9aff", "#f0b429", "#a855f7", "#e04040", "#0d9488"];
+const EXEC_COLORS = ["#4c9aff", "#f0b429", "#a855f7", "#e04040", "#0d9488", "#f97316"];
 const KPI_COLORS = ["#4c9aff", "#a855f7", "#e04040", "#16a34a"];
+
+// Parse a numeric value from KPI strings like "150", "$35", "4.5%", "30%"
+function parseKPIValue(str) {
+  if (!str || str === "—" || str === "") return null;
+  const cleaned = str.replace(/[$,%]/g, "").trim();
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+}
+
+// Calculate pacing: how close current is to target as a percentage
+// For CAC, lower is better (inverted)
+function calcPacing(kpi) {
+  const current = parseKPIValue(kpi.current);
+  const target = parseKPIValue(kpi.target);
+  if (current === null || target === null || target === 0) return null;
+
+  // CAC: lower is better
+  const isInverted = kpi.name.toLowerCase().includes("cac") || kpi.name.toLowerCase().includes("cost");
+  if (isInverted) {
+    // If current CAC is $20 and target is $35, that's great (175% pace)
+    // If current CAC is $50 and target is $35, that's bad (70% pace)
+    return Math.round((target / current) * 100);
+  }
+  return Math.round((current / target) * 100);
+}
+
+function getPacingColor(pct) {
+  if (pct === null) return "var(--text-muted)";
+  if (pct >= 80) return "var(--green)";
+  if (pct >= 50) return "var(--yellow)";
+  return "var(--accent)";
+}
+
+function getPacingLabel(pct) {
+  if (pct === null) return "No Data";
+  if (pct >= 100) return "On Target";
+  if (pct >= 80) return "On Pace";
+  if (pct >= 50) return "Behind";
+  return "At Risk";
+}
 
 function Countdown({ targetDate }) {
   const [tl, setTl] = useState(calc(targetDate));
@@ -75,7 +115,7 @@ export default function MissionControl() {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const allItems = [...(stats.funnel ? [stats.funnel] : []), ...(stats.tasks ? [stats.tasks] : []), ...(stats.creatives ? [stats.creatives] : [])];
+  const allItems = [...(stats.funnel ? [stats.funnel] : []), ...(stats.tasks ? [stats.tasks] : []), ...(stats.creatives ? [stats.creatives] : []), ...(stats.campaigns ? [stats.campaigns] : [])];
   const totalTasks = allItems.reduce((a, s) => a + s.total, 0);
   const totalDone = allItems.reduce((a, s) => a + (s.done || 0) + (s.live || 0), 0);
   const overallPct = totalTasks > 0 ? Math.round((totalDone / totalTasks) * 100) : 0;
@@ -87,11 +127,11 @@ export default function MissionControl() {
         <div className="card card-accent" style={{ "--card-accent-color": "#4c9aff" }}>
           <div className="card-label-color" style={{ "--card-accent-color": "#4c9aff" }}>The Story</div>
           {isEditMode ? (
-            <textarea className="task-notes" value={campaign.story} rows={3}
+            <textarea className="task-notes" value={campaign.story} rows={4}
               onChange={(e) => updateCampaign({ story: e.target.value })}
-              style={{ fontSize: 14, lineHeight: 1.6 }} />
+              style={{ fontSize: 12.5, lineHeight: 1.6 }} />
           ) : (
-            <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.7 }}>{campaign.story}</p>
+            <p style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.7 }}>{campaign.story}</p>
           )}
         </div>
         <div className="card card-accent" style={{ "--card-accent-color": "var(--accent)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -108,45 +148,70 @@ export default function MissionControl() {
         </div>
       </div>
 
-      {/* Row 2: KPIs + Progress */}
+      {/* Row 2: KPIs with pacing + Progress Ring */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 200px", gap: 16, marginBottom: 20 }}>
         <div className="card">
           <div className="card-label-color" style={{ "--card-accent-color": "var(--purple)" }}>Primary KPIs</div>
           <div style={{ display: "grid", gridTemplateColumns: `repeat(${campaign.primaryKPIs.length}, 1fr)`, gap: 12 }}>
-            {campaign.primaryKPIs.map((kpi, idx) => (
-              <div key={kpi.id} className="kpi-item" style={{ "--kpi-color": KPI_COLORS[idx % KPI_COLORS.length] }}>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
-                  {kpi.name}
-                </div>
-                <div style={{ display: "flex", justifyContent: "center", gap: 12, alignItems: "baseline" }}>
-                  <div>
-                    {isEditMode ? (
-                      <input className="inf-input" value={kpi.current}
-                        onChange={(e) => updateKPI(kpi.id, { current: e.target.value })}
-                        style={{ textAlign: "center", fontSize: 24, fontFamily: "var(--font-display)", fontWeight: 700, width: 80 }} />
-                    ) : (
-                      <div style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-primary)" }}>
-                        {kpi.current}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.08em" }}>CURRENT</div>
+            {campaign.primaryKPIs.map((kpi, idx) => {
+              const pacing = calcPacing(kpi);
+              const pacingColor = getPacingColor(pacing);
+              const pacingLabel = getPacingLabel(pacing);
+              return (
+                <div key={kpi.id} className="kpi-item" style={{ "--kpi-color": KPI_COLORS[idx % KPI_COLORS.length] }}>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+                    {kpi.name}
                   </div>
-                  <div style={{ color: "var(--text-faint)", fontSize: 12 }}>/</div>
-                  <div>
-                    {isEditMode ? (
-                      <input className="inf-input" value={kpi.target}
-                        onChange={(e) => updateKPI(kpi.id, { target: e.target.value })}
-                        style={{ textAlign: "center", fontSize: 16, fontFamily: "var(--font-display)", width: 60, color: "var(--text-muted)" }} />
-                    ) : (
-                      <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--text-muted)" }}>
-                        {kpi.target}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.08em" }}>TARGET</div>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 12, alignItems: "baseline" }}>
+                    <div>
+                      {isEditMode ? (
+                        <input className="inf-input" value={kpi.current}
+                          onChange={(e) => updateKPI(kpi.id, { current: e.target.value })}
+                          style={{ textAlign: "center", fontSize: 22, fontFamily: "var(--font-display)", fontWeight: 700, width: 80 }} />
+                      ) : (
+                        <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>
+                          {kpi.current}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.08em" }}>CURRENT</div>
+                    </div>
+                    <div style={{ color: "var(--text-faint)", fontSize: 12 }}>/</div>
+                    <div>
+                      {isEditMode ? (
+                        <input className="inf-input" value={kpi.target}
+                          onChange={(e) => updateKPI(kpi.id, { target: e.target.value })}
+                          style={{ textAlign: "center", fontSize: 14, fontFamily: "var(--font-display)", width: 60, color: "var(--text-muted)" }} />
+                      ) : (
+                        <div style={{ fontFamily: "var(--font-display)", fontSize: 14, color: "var(--text-muted)" }}>
+                          {kpi.target}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.08em" }}>TARGET</div>
+                    </div>
+                  </div>
+                  {/* Pacing indicator */}
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{
+                      height: 3, borderRadius: 2, background: "var(--bg-elevated)",
+                      overflow: "hidden", marginBottom: 4,
+                    }}>
+                      <div style={{
+                        height: "100%", borderRadius: 2, background: pacingColor,
+                        width: `${Math.min(pacing || 0, 100)}%`,
+                        transition: "width 0.4s",
+                      }} />
+                    </div>
+                    <div style={{
+                      fontSize: 9, fontWeight: 700, color: pacingColor,
+                      textTransform: "uppercase", letterSpacing: "0.06em",
+                      textAlign: "center",
+                    }}>
+                      {pacing !== null ? `${pacing}% — ${pacingLabel}` : pacingLabel}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         <div className="card progress-overall">
@@ -235,13 +300,14 @@ export default function MissionControl() {
         <div className="section-dot" style={{ background: "var(--teal)" }} />
         <div className="section-title">Execution Overview</div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
         {[
           { label: "Funnel Rows", s: stats.funnel, color: EXEC_COLORS[0] },
           { label: "Tasks", s: stats.tasks, color: EXEC_COLORS[1] },
           { label: "Creatives", s: stats.creatives, color: EXEC_COLORS[2] },
-          { label: "Moments", s: stats.moments, color: EXEC_COLORS[3] },
-          { label: "Offers", s: stats.offers, color: EXEC_COLORS[4] },
+          { label: "Campaigns", s: stats.campaigns, color: EXEC_COLORS[3] },
+          { label: "Moments", s: stats.moments, color: EXEC_COLORS[4] },
+          { label: "Offers", s: stats.offers, color: EXEC_COLORS[5] },
         ].map(({ label, s, color }) => (
           <div key={label} className="exec-stat-card" style={{ "--exec-color": color }}>
             <div style={{ fontSize: 10, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, fontWeight: 600 }}>{label}</div>
@@ -251,7 +317,7 @@ export default function MissionControl() {
                 <div style={{ fontSize: 9, color: "var(--text-faint)" }}>DONE</div>
               </div>
               <div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--yellow)" }}>{s.in_progress || 0}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--yellow)" }}>{(s.in_progress || 0) + (s.iterating || 0)}</div>
                 <div style={{ fontSize: 9, color: "var(--text-faint)" }}>ACTIVE</div>
               </div>
               <div>

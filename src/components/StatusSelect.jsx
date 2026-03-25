@@ -6,6 +6,7 @@ const TASK_STATUSES = [
   { value: "live", label: "Live" },
   { value: "done", label: "Done" },
   { value: "iterating", label: "Iterating" },
+  { value: "paused", label: "Paused" },
 ];
 
 export default function StatusSelect({ value, onChange, compact = false }) {
@@ -28,11 +29,11 @@ export default function StatusSelect({ value, onChange, compact = false }) {
 export function StatusBadge({ status }) {
   const labels = {
     not_started: "Not Started", in_progress: "In Progress",
-    live: "Live", done: "Done", iterating: "Iterating",
+    live: "Live", done: "Done", iterating: "Iterating", paused: "Paused",
   };
   const colors = {
     not_started: "var(--text-muted)", in_progress: "var(--yellow)",
-    live: "var(--green)", done: "var(--green)", iterating: "var(--blue)",
+    live: "var(--green)", done: "var(--green)", iterating: "var(--blue)", paused: "var(--orange)",
   };
   return (
     <span className={`status-badge ${status}`} style={{ color: colors[status], background: `${colors[status]}18` }}>
@@ -46,10 +47,12 @@ export function ChannelTags({ channels }) {
   const COLORS = {
     meta: "#4c9aff", tiktok: "#ff0050", youtube: "#ff4444",
     email: "#f0b429", twitter: "#1da1f2", linkedin: "#0077b5", direct: "#8f96a8",
+    landing: "#a855f7", networks: "#0d9488", influencers: "#f97316",
   };
   const NAMES = {
     meta: "Meta", tiktok: "TikTok", youtube: "YouTube",
     email: "Email", twitter: "X", linkedin: "LinkedIn", direct: "Direct",
+    landing: "Landing", networks: "Networks", influencers: "Influencers",
   };
   return (
     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>

@@ -353,6 +353,73 @@ export const CHANNELS_DEFAULTS = [
   },
 ];
 
+// ─── CAMPAIGNS (execution objects per channel) ─────────────────
+export const CAMPAIGNS_DEFAULTS = [
+  {
+    id: "camp-1", name: "Teaser Hook Series", channel: "ch-meta",
+    funnelStage: "awareness", objective: "Awareness",
+    owner: "", budget: "$150/day",
+    assets: "5 hook videos (curiosity-driven shorts)",
+    linkedOffer: "", kpiTarget: "CTR > 2%, CPM < $12",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-2", name: "Gate-Expose Video Drops", channel: "ch-tiktok",
+    funnelStage: "awareness", objective: "Awareness",
+    owner: "", budget: "Organic",
+    assets: "Daily teaser drops, mic-drop clips",
+    linkedOffer: "", kpiTarget: "10k views/video, 5% engagement",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-3", name: "Brand Story Long-Form", channel: "ch-youtube",
+    funnelStage: "consideration", objective: "Consideration",
+    owner: "", budget: "$500 production",
+    assets: "Brand story video, explainer content",
+    linkedOffer: "", kpiTarget: "Watch time > 60%, 1k views",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-4", name: "Launch Offer Retargeting", channel: "ch-meta",
+    funnelStage: "conversion", objective: "Conversion",
+    owner: "", budget: "$200/day",
+    assets: "Retargeting carousel, value comparison graphics",
+    linkedOffer: "o-3", kpiTarget: "CVR > 4%, CPA < $35",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-5", name: "Waitlist → Launch Email Sequence", channel: "ch-email",
+    funnelStage: "conversion", objective: "Conversion",
+    owner: "", budget: "$0",
+    assets: "5-email drip sequence",
+    linkedOffer: "o-1", kpiTarget: "Open > 35%, Click > 8%",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-6", name: "Simulator Partnership Push", channel: "ch-networks",
+    funnelStage: "awareness", objective: "Awareness",
+    owner: "", budget: "TBD",
+    assets: "Co-branded QR cards, sample kits",
+    linkedOffer: "o-2", kpiTarget: "50 signups/location",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+  {
+    id: "camp-7", name: "UGC Push Week 1", channel: "ch-tiktok",
+    funnelStage: "retention", objective: "Retention",
+    owner: "", budget: "Organic",
+    assets: "UGC prompts, duet templates",
+    linkedOffer: "o-4", kpiTarget: "20 UGC posts",
+    performance: "", status: "not_started",
+    startDate: "", endDate: "",
+  },
+];
+
 // ─── OFFERS ─────────────────────────────────────────────────────
 export const OFFERS_DEFAULTS = [
   {
@@ -360,28 +427,36 @@ export const OFFERS_DEFAULTS = [
     description: "High perceived value relative to cost — premium golf products at online pricing",
     valueStack: "Premium products + pricing advantage + curated experience",
     targetAudience: "New members from launch campaign",
-    funnelStage: "conversion", performance: "", status: "not_started",
+    funnelStage: "conversion", status: "not_started",
+    owner: "", channelsActive: ["meta", "email", "landing"],
+    volumeTarget: "200 purchases", deadline: "", conversionMetrics: "",
   },
   {
     id: "o-2", name: "Free Trial or Bonus",
     description: "Low-risk entry point to experience the Mully difference",
     valueStack: "Try before full commitment + bonus product/perk",
     targetAudience: "Consideration-stage leads who need a push",
-    funnelStage: "conversion", performance: "", status: "not_started",
+    funnelStage: "conversion", status: "not_started",
+    owner: "", channelsActive: ["meta", "landing", "networks"],
+    volumeTarget: "500 trials", deadline: "", conversionMetrics: "",
   },
   {
     id: "o-3", name: "Founding Member Perks",
     description: "Early adopters get exclusive pricing, first access to drops, founding member status",
     valueStack: "Exclusive status + ongoing savings + priority access + community",
     targetAudience: "First 500 members",
-    funnelStage: "conversion", performance: "", status: "not_started",
+    funnelStage: "conversion", status: "not_started",
+    owner: "", channelsActive: ["meta", "email", "landing", "tiktok"],
+    volumeTarget: "500 founding members", deadline: "2026-04-30", conversionMetrics: "",
   },
   {
     id: "o-4", name: "Referral Reward",
     description: "Members earn rewards for bringing in new members",
     valueStack: "Free product or credits per referral",
     targetAudience: "Existing satisfied members",
-    funnelStage: "retention", performance: "", status: "not_started",
+    funnelStage: "retention", status: "not_started",
+    owner: "", channelsActive: ["email", "direct"],
+    volumeTarget: "100 referrals", deadline: "", conversionMetrics: "",
   },
 ];
 
