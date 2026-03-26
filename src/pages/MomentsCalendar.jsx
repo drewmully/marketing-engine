@@ -166,6 +166,45 @@ export default function MomentsCalendar() {
                   <ChannelTags channels={m.channels} />
                 </div>
 
+                {/* Readiness Indicator */}
+                {(linkedCamps.length > 0 || linkedCreativs.length > 0) && (() => {
+                  const campsDone = linkedCamps.filter((c) => c.status === "live" || c.status === "done" || c.status === "iterating").length;
+                  const contentDone = linkedCreativs.filter((c) => c.status === "done" || c.status === "live").length;
+                  const totalItems = linkedCamps.length + linkedCreativs.length;
+                  const doneItems = campsDone + contentDone;
+                  const pct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+                  return (
+                    <div style={{
+                      marginTop: 10, padding: "8px 12px",
+                      background: pct === 100 ? "var(--green-soft)" : "var(--bg-surface)",
+                      borderRadius: "var(--radius-sm)", border: "1px solid var(--border)",
+                      display: "flex", alignItems: "center", gap: 12,
+                    }}>
+                      <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", flexShrink: 0 }}>
+                        Readiness
+                      </div>
+                      <div className="progress-bar" style={{ flex: 1, height: 4 }}>
+                        <div className="progress-bar-fill" style={{
+                          width: `${pct}%`,
+                          background: pct === 100 ? "var(--green)" : pct >= 50 ? "var(--yellow)" : "var(--accent)",
+                        }} />
+                      </div>
+                      <div style={{ display: "flex", gap: 10, fontSize: 10 }}>
+                        <span style={{ color: "var(--text-secondary)" }}>
+                          <strong style={{ color: contentDone === linkedCreativs.length && linkedCreativs.length > 0 ? "var(--green)" : "var(--text-primary)" }}>
+                            {contentDone}/{linkedCreativs.length}
+                          </strong> content
+                        </span>
+                        <span style={{ color: "var(--text-secondary)" }}>
+                          <strong style={{ color: campsDone === linkedCamps.length && linkedCamps.length > 0 ? "var(--green)" : "var(--text-primary)" }}>
+                            {campsDone}/{linkedCamps.length}
+                          </strong> campaigns
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Linked Campaigns */}
                 {linkedCamps.length > 0 && (
                   <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>

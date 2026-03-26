@@ -1,27 +1,150 @@
 import { useState } from "react";
 import { useCampaign } from "../context/CampaignContext";
 import { useAuth } from "../context/AuthContext";
-import { CHANNEL_COLORS, FUNNEL_STAGES } from "../data/campaignData";
+import { CHANNEL_COLORS, FUNNEL_STAGES, CHANNEL_NAMES } from "../data/campaignData";
 import StatusSelect, { StatusBadge, ChannelTags, AddButton } from "../components/StatusSelect";
 import { EditableText, EditableTextarea } from "../components/EditableField";
+
+function CampaignCard({ camp, campaigns, offers, moments, channels, isEditMode, color }) {
+  const offerNames = {};
+  offers.items.forEach((o) => { offerNames[o.id] = o.name; });
+  const momentNames = {};
+  moments.items.forEach((m) => { momentNames[m.id] = m.name; });
+  const stage = FUNNEL_STAGES.find((s) => s.id === camp.funnelStage);
+
+  return (
+    <div className="card" style={{ padding: "12px 16px", borderLeft: `3px solid ${stage?.color || color || "var(--border)"}` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <EditableText value={camp.name}
+              onChange={(v) => campaigns.update(camp.id, { name: v })}
+              placeholder="Campaign name"
+              style={{ fontSize: 14, fontWeight: 600 }} />
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+            {isEditMode ? (
+              <select className="status-select" value={camp.funnelStage || "awareness"}
+                onChange={(e) => campaigns.update(camp.id, { funnelStage: e.target.value })}
+                style={{ fontSize: 10, padding: "2px 20px 2px 6px" }}>
+                {FUNNEL_STAGES.map((s) => <option key={s.id} value={s.id}>{s.emoji} {s.name}</option>)}
+              </select>
+            ) : (
+              <span className="channel-tag" style={{
+                background: `${stage?.color || "#999"}18`, color: stage?.color, fontSize: 10,
+              }}>{stage?.emoji} {stage?.name}</span>
+            )}
+            {isEditMode ? (
+              <input className="inf-input" value={camp.objective || ""}
+                onChange={(e) => campaigns.update(camp.id, { objective: e.target.value })}
+                placeholder="Objective"
+                style={{ fontSize: 10, width: 100, padding: "2px 6px" }} />
+            ) : camp.objective && (
+              <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500 }}>{camp.objective}</span>
+            )}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+          {isEditMode
+            ? <StatusSelect value={camp.status} onChange={(v) => campaigns.update(camp.id, { status: v })} compact />
+            : <StatusBadge status={camp.status} />}
+          {isEditMode && (
+            <button onClick={() => campaigns.remove(camp.id)}
+              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14 }}>×</button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Owner</div>
+          <EditableText value={camp.owner} onChange={(v) => campaigns.update(camp.id, { owner: v })} placeholder="Who owns this?" />
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Budget</div>
+          <EditableText value={camp.budget} onChange={(v) => campaigns.update(camp.id, { budget: v })} placeholder="$0/day" />
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>KPI Target</div>
+          <EditableText value={camp.kpiTarget} onChange={(v) => campaigns.update(camp.id, { kpiTarget: v })} placeholder="CTR, CPA..." />
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Performance</div>
+          <EditableText value={camp.performance} onChange={(v) => campaigns.update(camp.id, { performance: v })} placeholder="Results..." />
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginTop: 6 }}>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Assets</div>
+          <EditableText value={camp.assets} onChange={(v) => campaigns.update(camp.id, { assets: v })} placeholder="Creatives being used" />
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Linked Offer</div>
+          {isEditMode ? (
+            <select className="status-select" value={camp.linkedOffer || ""}
+              onChange={(e) => campaigns.update(camp.id, { linkedOffer: e.target.value })}
+              style={{ fontSize: 11, width: "100%" }}>
+              <option value="">— none —</option>
+              {offers.items.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          ) : (
+            <span style={{ fontSize: 12, color: camp.linkedOffer ? "var(--accent)" : "var(--text-muted)" }}>
+              {camp.linkedOffer ? (offerNames[camp.linkedOffer] || "—") : "—"}
+            </span>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Linked Moment</div>
+          {isEditMode ? (
+            <select className="status-select" value={camp.linkedMoment || ""}
+              onChange={(e) => campaigns.update(camp.id, { linkedMoment: e.target.value })}
+              style={{ fontSize: 11, width: "100%" }}>
+              <option value="">— none —</option>
+              {moments.items.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          ) : (
+            <span style={{ fontSize: 12, color: camp.linkedMoment ? "var(--accent)" : "var(--text-muted)" }}>
+              {camp.linkedMoment ? (momentNames[camp.linkedMoment] || "—") : "—"}
+            </span>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Dates</div>
+          {isEditMode ? (
+            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              <input type="date" value={camp.startDate || ""}
+                onChange={(e) => campaigns.update(camp.id, { startDate: e.target.value })}
+                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 10, padding: "2px 4px", borderRadius: "var(--radius-sm)", width: 90 }} />
+              <span style={{ fontSize: 10, color: "var(--text-faint)" }}>→</span>
+              <input type="date" value={camp.endDate || ""}
+                onChange={(e) => campaigns.update(camp.id, { endDate: e.target.value })}
+                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 10, padding: "2px 4px", borderRadius: "var(--radius-sm)", width: 90 }} />
+            </div>
+          ) : (
+            <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+              {camp.startDate ? new Date(camp.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
+              {camp.endDate ? ` → ${new Date(camp.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Distribution() {
   const { channels, campaigns, offers, moments } = useCampaign();
   const { isEditMode } = useAuth();
   const [expandedChannel, setExpandedChannel] = useState(null);
+  const [groupBy, setGroupBy] = useState("channel"); // channel | moment
 
-  // Build lookups
-  const offerNames = {};
-  offers.items.forEach((o) => { offerNames[o.id] = o.name; });
-  const momentNames = {};
-  moments.items.forEach((m) => { momentNames[m.id] = m.name; });
-
-  // Stats for hero
   const liveCampaigns = campaigns.items.filter((c) => c.status === "live" || c.status === "iterating").length;
-  const totalBudget = campaigns.items.reduce((sum, c) => {
-    const match = (c.budget || "").match(/\$?([\d,.]+)/);
-    return sum + (match ? parseFloat(match[1].replace(",", "")) : 0);
-  }, 0);
+
+  // Sort moments by date for "By Moment" view
+  const sortedMoments = [...moments.items].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const cardProps = { campaigns, offers, moments, channels, isEditMode };
 
   return (
     <div>
@@ -47,249 +170,205 @@ export default function Distribution() {
             </div>
           </div>
         </div>
-        {/* Channel quick-nav */}
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(channels.items.length, 5)}, 1fr)`, gap: 8, marginTop: 16 }}>
-          {channels.items.map((ch) => {
+        {groupBy === "channel" && (
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(channels.items.length, 5)}, 1fr)`, gap: 8, marginTop: 16 }}>
+            {channels.items.map((ch) => {
+              const chCamps = campaigns.items.filter((c) => c.channel === ch.id);
+              const chLive = chCamps.filter((c) => c.status === "live" || c.status === "iterating").length;
+              return (
+                <div key={ch.id} className="channel-mini" style={{
+                  borderLeft: `3px solid ${CHANNEL_COLORS[ch.id] || "var(--border)"}`,
+                  cursor: "pointer",
+                  background: expandedChannel === ch.id ? `${CHANNEL_COLORS[ch.id] || "#999"}0a` : undefined,
+                }} onClick={() => setExpandedChannel(expandedChannel === ch.id ? null : ch.id)}>
+                  <span className="ch-emoji">{ch.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <div className="ch-name" style={{ color: CHANNEL_COLORS[ch.id] || "var(--text-primary)" }}>{ch.name}</div>
+                    <div className="ch-kpi">{chCamps.length} campaigns · {chLive} live</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Group toggle */}
+      <div className="filter-bar">
+        <button className={`filter-btn ${groupBy === "channel" ? "active" : ""}`}
+          onClick={() => setGroupBy("channel")}>By Channel</button>
+        <button className={`filter-btn ${groupBy === "moment" ? "active" : ""}`}
+          onClick={() => setGroupBy("moment")}>By Moment</button>
+      </div>
+
+      {groupBy === "channel" ? (
+        /* ─── By Channel View ─── */
+        channels.items
+          .filter((ch) => !expandedChannel || expandedChannel === ch.id)
+          .map((ch) => {
             const chCamps = campaigns.items.filter((c) => c.channel === ch.id);
-            const chLive = chCamps.filter((c) => c.status === "live" || c.status === "iterating").length;
+            const color = CHANNEL_COLORS[ch.id] || "#999";
             return (
-              <div key={ch.id} className="channel-mini" style={{
-                borderLeft: `3px solid ${CHANNEL_COLORS[ch.id] || "var(--border)"}`,
-                cursor: "pointer",
-                background: expandedChannel === ch.id ? `${CHANNEL_COLORS[ch.id] || "#999"}0a` : undefined,
-              }} onClick={() => setExpandedChannel(expandedChannel === ch.id ? null : ch.id)}>
-                <span className="ch-emoji">{ch.emoji}</span>
-                <div style={{ flex: 1 }}>
-                  <div className="ch-name" style={{ color: CHANNEL_COLORS[ch.id] || "var(--text-primary)" }}>{ch.name}</div>
-                  <div className="ch-kpi">{chCamps.length} campaigns · {chLive} live</div>
+              <div key={ch.id} style={{ marginBottom: 28 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "12px 16px", marginBottom: 12,
+                  background: `${color}06`, borderRadius: "var(--radius-sm)",
+                  borderLeft: `4px solid ${color}`,
+                }}>
+                  <span style={{ fontSize: 20 }}>{ch.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color }}>
+                      {ch.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {isEditMode ? (
+                        <EditableText value={ch.strategy}
+                          onChange={(v) => channels.update(ch.id, { strategy: v })}
+                          placeholder="Channel strategy..." />
+                      ) : ch.strategy}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, textAlign: "center", flexShrink: 0 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Audience</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {isEditMode ? (
+                          <EditableText value={ch.targetAudience} onChange={(v) => channels.update(ch.id, { targetAudience: v })} placeholder="Who?" />
+                        ) : ch.targetAudience?.split(",")[0] || "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Budget</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)" }}>
+                        {isEditMode ? (
+                          <EditableText value={ch.budget} onChange={(v) => channels.update(ch.id, { budget: v })} placeholder="$0" />
+                        ) : ch.budget || "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ paddingLeft: 20 }}>
+                  <div className="section-header" style={{ marginBottom: 8 }}>
+                    <div className="section-dot" style={{ background: color }} />
+                    <div className="section-title">Active Campaigns ({chCamps.length})</div>
+                  </div>
+                  {chCamps.length === 0 && (
+                    <div style={{ padding: "12px 16px", fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
+                      No campaigns yet — add one to start executing
+                    </div>
+                  )}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {chCamps.map((camp) => (
+                      <CampaignCard key={camp.id} camp={camp} color={color} {...cardProps} />
+                    ))}
+                  </div>
+                  <AddButton label="Add Campaign" onClick={() => campaigns.add({
+                    name: "", channel: ch.id, funnelStage: "awareness", objective: "Awareness",
+                    owner: "", budget: "", assets: "", linkedOffer: "", linkedMoment: "",
+                    kpiTarget: "", performance: "", status: "not_started",
+                    startDate: "", endDate: "",
+                  })} />
                 </div>
               </div>
             );
-          })}
-        </div>
-      </div>
+          })
+      ) : (
+        /* ─── By Moment View ─── */
+        <>
+          {sortedMoments.map((m) => {
+            const mCamps = campaigns.items.filter((c) => c.linkedMoment === m.id);
+            if (mCamps.length === 0) return null;
+            const d = new Date(m.date);
+            const liveCt = mCamps.filter((c) => c.status === "live" || c.status === "iterating").length;
+            const totalBudget = mCamps.reduce((sum, c) => {
+              const match = (c.budget || "").match(/\$?([\d,.]+)/);
+              return sum + (match ? parseFloat(match[1].replace(",", "")) : 0);
+            }, 0);
 
-      {/* Channel sections */}
-      {channels.items
-        .filter((ch) => !expandedChannel || expandedChannel === ch.id)
-        .map((ch) => {
-          const chCamps = campaigns.items.filter((c) => c.channel === ch.id);
-          const color = CHANNEL_COLORS[ch.id] || "#999";
-
-          return (
-            <div key={ch.id} style={{ marginBottom: 28 }}>
-              {/* Channel header */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "12px 16px", marginBottom: 12,
-                background: `${color}06`, borderRadius: "var(--radius-sm)",
-                borderLeft: `4px solid ${color}`,
-              }}>
-                <span style={{ fontSize: 20 }}>{ch.emoji}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color }}>
-                    {ch.name}
+            return (
+              <div key={m.id} style={{ marginBottom: 28 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "12px 16px", marginBottom: 10,
+                  background: "var(--bg-surface)", borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border)", borderLeft: "3px solid var(--purple)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: "var(--purple)" }}>
+                      {m.name}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {isEditMode ? (
-                      <EditableText value={ch.strategy}
-                        onChange={(v) => channels.update(ch.id, { strategy: v })}
-                        placeholder="Channel strategy..." />
-                    ) : (
-                      ch.strategy
+                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {mCamps.length} campaign{mCamps.length !== 1 ? "s" : ""}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--green)" }}>
+                      {liveCt} live
+                    </span>
+                    {totalBudget > 0 && (
+                      <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+                        ${totalBudget.toLocaleString()}/day
+                      </span>
                     )}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 12, textAlign: "center", flexShrink: 0 }}>
-                  <div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Audience</div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {isEditMode ? (
-                        <EditableText value={ch.targetAudience}
-                          onChange={(v) => channels.update(ch.id, { targetAudience: v })}
-                          placeholder="Who?" />
-                      ) : (
-                        ch.targetAudience?.split(",")[0] || "—"
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Budget</div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)" }}>
-                      {isEditMode ? (
-                        <EditableText value={ch.budget}
-                          onChange={(v) => channels.update(ch.id, { budget: v })}
-                          placeholder="$0" />
-                      ) : (
-                        ch.budget || "—"
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Active Campaigns */}
-              <div style={{ paddingLeft: 20 }}>
-                <div className="section-header" style={{ marginBottom: 8 }}>
-                  <div className="section-dot" style={{ background: color }} />
-                  <div className="section-title">Active Campaigns ({chCamps.length})</div>
-                </div>
-
-                {chCamps.length === 0 && (
-                  <div style={{ padding: "12px 16px", fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
-                    No campaigns yet — add one to start executing
-                  </div>
-                )}
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {chCamps.map((camp) => {
-                    const stage = FUNNEL_STAGES.find((s) => s.id === camp.funnelStage);
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingLeft: 12 }}>
+                  {mCamps.map((camp) => {
+                    const ch = channels.items.find((c) => c.id === camp.channel);
+                    const chColor = CHANNEL_COLORS[camp.channel] || CHANNEL_COLORS[camp.channel?.replace("ch-", "")] || "#999";
                     return (
-                      <div key={camp.id} className="card" style={{
-                        padding: "12px 16px",
-                        borderLeft: `3px solid ${stage?.color || color}`,
-                      }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <EditableText value={camp.name}
-                                onChange={(v) => campaigns.update(camp.id, { name: v })}
-                                placeholder="Campaign name"
-                                style={{ fontSize: 14, fontWeight: 600 }} />
-                            </div>
-                            <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
-                              {isEditMode ? (
-                                <select className="status-select" value={camp.funnelStage || "awareness"}
-                                  onChange={(e) => campaigns.update(camp.id, { funnelStage: e.target.value })}
-                                  style={{ fontSize: 10, padding: "2px 20px 2px 6px" }}>
-                                  {FUNNEL_STAGES.map((s) => <option key={s.id} value={s.id}>{s.emoji} {s.name}</option>)}
-                                </select>
-                              ) : (
-                                <span className="channel-tag" style={{
-                                  background: `${stage?.color || "#999"}18`, color: stage?.color,
-                                  fontSize: 10,
-                                }}>{stage?.emoji} {stage?.name}</span>
-                              )}
-                              {isEditMode ? (
-                                <input className="inf-input" value={camp.objective || ""}
-                                  onChange={(e) => campaigns.update(camp.id, { objective: e.target.value })}
-                                  placeholder="Objective"
-                                  style={{ fontSize: 10, width: 100, padding: "2px 6px" }} />
-                              ) : camp.objective && (
-                                <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500 }}>{camp.objective}</span>
-                              )}
-                            </div>
+                      <div key={camp.id} style={{ position: "relative" }}>
+                        {ch && (
+                          <div style={{
+                            position: "absolute", top: 12, right: 12,
+                            display: "flex", alignItems: "center", gap: 4,
+                            fontSize: 10, color: chColor, opacity: 0.8,
+                          }}>
+                            <span>{ch.emoji}</span> {ch.name}
                           </div>
-                          <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
-                            {isEditMode
-                              ? <StatusSelect value={camp.status} onChange={(v) => campaigns.update(camp.id, { status: v })} compact />
-                              : <StatusBadge status={camp.status} />}
-                            {isEditMode && (
-                              <button onClick={() => campaigns.remove(camp.id)}
-                                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14 }}>×</button>
-                            )}
-                          </div>
-                        </div>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Owner</div>
-                            <EditableText value={camp.owner}
-                              onChange={(v) => campaigns.update(camp.id, { owner: v })}
-                              placeholder="Who owns this?" />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Budget</div>
-                            <EditableText value={camp.budget}
-                              onChange={(v) => campaigns.update(camp.id, { budget: v })}
-                              placeholder="$0/day" />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>KPI Target</div>
-                            <EditableText value={camp.kpiTarget}
-                              onChange={(v) => campaigns.update(camp.id, { kpiTarget: v })}
-                              placeholder="CTR, CPA..." />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Performance</div>
-                            <EditableText value={camp.performance}
-                              onChange={(v) => campaigns.update(camp.id, { performance: v })}
-                              placeholder="Results..." />
-                          </div>
-                        </div>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginTop: 6 }}>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Assets</div>
-                            <EditableText value={camp.assets}
-                              onChange={(v) => campaigns.update(camp.id, { assets: v })}
-                              placeholder="Creatives being used" />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Linked Offer</div>
-                            {isEditMode ? (
-                              <select className="status-select" value={camp.linkedOffer || ""}
-                                onChange={(e) => campaigns.update(camp.id, { linkedOffer: e.target.value })}
-                                style={{ fontSize: 11, width: "100%" }}>
-                                <option value="">— none —</option>
-                                {offers.items.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-                              </select>
-                            ) : (
-                              <span style={{ fontSize: 12, color: camp.linkedOffer ? "var(--accent)" : "var(--text-muted)" }}>
-                                {camp.linkedOffer ? (offerNames[camp.linkedOffer] || "—") : "—"}
-                              </span>
-                            )}
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Linked Moment</div>
-                            {isEditMode ? (
-                              <select className="status-select" value={camp.linkedMoment || ""}
-                                onChange={(e) => campaigns.update(camp.id, { linkedMoment: e.target.value })}
-                                style={{ fontSize: 11, width: "100%" }}>
-                                <option value="">— none —</option>
-                                {moments.items.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                              </select>
-                            ) : (
-                              <span style={{ fontSize: 12, color: camp.linkedMoment ? "var(--accent)" : "var(--text-muted)" }}>
-                                {camp.linkedMoment ? (momentNames[camp.linkedMoment] || "—") : "—"}
-                              </span>
-                            )}
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Dates</div>
-                            {isEditMode ? (
-                              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                                <input type="date" value={camp.startDate || ""}
-                                  onChange={(e) => campaigns.update(camp.id, { startDate: e.target.value })}
-                                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 10, padding: "2px 4px", borderRadius: "var(--radius-sm)", width: 90 }} />
-                                <span style={{ fontSize: 10, color: "var(--text-faint)" }}>→</span>
-                                <input type="date" value={camp.endDate || ""}
-                                  onChange={(e) => campaigns.update(camp.id, { endDate: e.target.value })}
-                                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 10, padding: "2px 4px", borderRadius: "var(--radius-sm)", width: 90 }} />
-                              </div>
-                            ) : (
-                              <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
-                                {camp.startDate ? new Date(camp.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
-                                {camp.endDate ? ` → ${new Date(camp.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        )}
+                        <CampaignCard camp={camp} color={chColor} {...cardProps} />
                       </div>
                     );
                   })}
                 </div>
-
-                <AddButton label="Add Campaign" onClick={() => campaigns.add({
-                  name: "", channel: ch.id, funnelStage: "awareness", objective: "Awareness",
-                  owner: "", budget: "", assets: "", linkedOffer: "", linkedMoment: "",
-                  kpiTarget: "", performance: "", status: "not_started",
-                  startDate: "", endDate: "",
-                })} />
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+
+          {/* Unlinked campaigns */}
+          {(() => {
+            const unlinked = campaigns.items.filter((c) => !c.linkedMoment);
+            if (unlinked.length === 0) return null;
+            return (
+              <div style={{ marginBottom: 28 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "12px 16px", marginBottom: 10,
+                  background: "var(--bg-surface)", borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border)", borderLeft: "3px solid var(--text-muted)",
+                }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: "var(--text-muted)" }}>
+                    Unlinked (no moment)
+                  </span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{unlinked.length} campaigns</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingLeft: 12 }}>
+                  {unlinked.map((camp) => (
+                    <CampaignCard key={camp.id} camp={camp} {...cardProps} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </>
+      )}
     </div>
   );
 }

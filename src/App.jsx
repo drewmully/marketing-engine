@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HashRouter, Routes, Route, NavLink } from "react-router-dom";
+import { HashRouter, Routes, Route, NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Filter, Calendar, Building2, Palette,
   Radio, RefreshCcw, Tag, Rocket, Lock, Unlock, Eye, Sun, Moon,
@@ -7,6 +7,7 @@ import {
 import { CampaignProvider } from "./context/CampaignContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import FlowBar from "./components/FlowBar";
 import MissionControl from "./pages/MissionControl";
 import FunnelSystem from "./pages/FunnelSystem";
 import MomentsCalendar from "./pages/MomentsCalendar";
@@ -19,20 +20,20 @@ import PostLaunch from "./pages/PostLaunch";
 
 const NAV = [
   { path: "/", icon: LayoutDashboard, label: "Mission Control", section: null },
-  { path: "/funnel", icon: Filter, label: "Messaging", section: "engine" },
-  { path: "/moments", icon: Calendar, label: "Moments", section: "engine" },
-  { path: "/org", icon: Building2, label: "Org Alignment", section: "engine" },
-  { path: "/creative", icon: Palette, label: "Content Studio", section: "create" },
-  { path: "/distribution", icon: Radio, label: "Distribution", section: "create" },
-  { path: "/feedback", icon: RefreshCcw, label: "Feedback Loops", section: "optimize" },
-  { path: "/offers", icon: Tag, label: "Offers", section: "optimize" },
-  { path: "/post-launch", icon: Rocket, label: "Post-Launch", section: "optimize" },
+  { path: "/funnel", icon: Filter, label: "Messaging", section: "strategy" },
+  { path: "/moments", icon: Calendar, label: "Moments", section: "strategy" },
+  { path: "/creative", icon: Palette, label: "Content Studio", section: "execution" },
+  { path: "/distribution", icon: Radio, label: "Distribution", section: "execution" },
+  { path: "/offers", icon: Tag, label: "Offers", section: "execution" },
+  { path: "/org", icon: Building2, label: "Org Alignment", section: "operations" },
+  { path: "/feedback", icon: RefreshCcw, label: "Feedback Loops", section: "operations" },
+  { path: "/post-launch", icon: Rocket, label: "Post-Launch", section: "operations" },
 ];
 
 const SECTIONS = {
-  engine: { label: "CORE ENGINE", cls: "engine" },
-  create: { label: "CREATE & DISTRIBUTE", cls: "create" },
-  optimize: { label: "OPTIMIZE & GROW", cls: "optimize" },
+  strategy: { label: "STRATEGY", num: "①", cls: "strategy" },
+  execution: { label: "EXECUTION", num: "②", cls: "execution" },
+  operations: { label: "OPERATIONS", num: "③", cls: "operations" },
 };
 
 function LoginModal({ onClose }) {
@@ -67,10 +68,11 @@ function TopBar() {
   const { isEditMode, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
+  const location = useLocation();
   return (
     <>
       <div className="top-bar">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
           {!isEditMode && (
             <div className="view-mode-banner"><Eye size={14} /> View only</div>
           )}
@@ -91,6 +93,7 @@ function TopBar() {
           )}
         </div>
       </div>
+      <FlowBar path={location.pathname} />
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
   );
@@ -106,13 +109,15 @@ function AppShell() {
           <div className="tagline">THE PEOPLE'S REVOLT</div>
         </div>
         <ul className="sidebar-nav">
-          {NAV.map(({ path, icon: Icon, label, section }) => {
+          {NAV.map(({ path, icon: Icon, label, section }, idx) => {
             const showDivider = section && section !== lastSection;
+            const sameSection = section && section === lastSection;
             lastSection = section;
             return (
-              <li key={path}>
+              <li key={path} className={sameSection ? "nav-connected" : ""}>
                 {showDivider && (
                   <div className={`sidebar-section-label ${SECTIONS[section].cls}`}>
+                    <span className="section-num">{SECTIONS[section].num}</span>
                     {SECTIONS[section].label}
                   </div>
                 )}
