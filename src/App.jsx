@@ -19,10 +19,10 @@ import PostLaunch from "./pages/PostLaunch";
 
 const NAV = [
   { path: "/", icon: LayoutDashboard, label: "Mission Control", section: null },
-  { path: "/funnel", icon: Filter, label: "Funnel System", section: "engine" },
+  { path: "/funnel", icon: Filter, label: "Messaging", section: "engine" },
   { path: "/moments", icon: Calendar, label: "Moments", section: "engine" },
   { path: "/org", icon: Building2, label: "Org Alignment", section: "engine" },
-  { path: "/creative", icon: Palette, label: "Creative", section: "create" },
+  { path: "/creative", icon: Palette, label: "Content Studio", section: "create" },
   { path: "/distribution", icon: Radio, label: "Distribution", section: "create" },
   { path: "/feedback", icon: RefreshCcw, label: "Feedback Loops", section: "optimize" },
   { path: "/offers", icon: Tag, label: "Offers", section: "optimize" },

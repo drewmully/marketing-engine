@@ -6,13 +6,15 @@ import StatusSelect, { StatusBadge, ChannelTags, AddButton } from "../components
 import { EditableText, EditableTextarea } from "../components/EditableField";
 
 export default function Distribution() {
-  const { channels, campaigns, offers } = useCampaign();
+  const { channels, campaigns, offers, moments } = useCampaign();
   const { isEditMode } = useAuth();
   const [expandedChannel, setExpandedChannel] = useState(null);
 
-  // Build offer name lookup
+  // Build lookups
   const offerNames = {};
   offers.items.forEach((o) => { offerNames[o.id] = o.name; });
+  const momentNames = {};
+  moments.items.forEach((m) => { momentNames[m.id] = m.name; });
 
   // Stats for hero
   const liveCampaigns = campaigns.items.filter((c) => c.status === "live" || c.status === "iterating").length;
@@ -216,7 +218,7 @@ export default function Distribution() {
                           </div>
                         </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 6 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginTop: 6 }}>
                           <div>
                             <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Assets</div>
                             <EditableText value={camp.assets}
@@ -235,6 +237,21 @@ export default function Distribution() {
                             ) : (
                               <span style={{ fontSize: 12, color: camp.linkedOffer ? "var(--accent)" : "var(--text-muted)" }}>
                                 {camp.linkedOffer ? (offerNames[camp.linkedOffer] || "—") : "—"}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Linked Moment</div>
+                            {isEditMode ? (
+                              <select className="status-select" value={camp.linkedMoment || ""}
+                                onChange={(e) => campaigns.update(camp.id, { linkedMoment: e.target.value })}
+                                style={{ fontSize: 11, width: "100%" }}>
+                                <option value="">— none —</option>
+                                {moments.items.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                              </select>
+                            ) : (
+                              <span style={{ fontSize: 12, color: camp.linkedMoment ? "var(--accent)" : "var(--text-muted)" }}>
+                                {camp.linkedMoment ? (momentNames[camp.linkedMoment] || "—") : "—"}
                               </span>
                             )}
                           </div>
@@ -265,7 +282,7 @@ export default function Distribution() {
 
                 <AddButton label="Add Campaign" onClick={() => campaigns.add({
                   name: "", channel: ch.id, funnelStage: "awareness", objective: "Awareness",
-                  owner: "", budget: "", assets: "", linkedOffer: "",
+                  owner: "", budget: "", assets: "", linkedOffer: "", linkedMoment: "",
                   kpiTarget: "", performance: "", status: "not_started",
                   startDate: "", endDate: "",
                 })} />

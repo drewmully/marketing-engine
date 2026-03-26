@@ -1,10 +1,11 @@
 import { useCampaign } from "../context/CampaignContext";
 import { useAuth } from "../context/AuthContext";
+import { CHANNEL_NAMES, CHANNEL_COLORS } from "../data/campaignData";
 import StatusSelect, { StatusBadge, ChannelTags, AddButton } from "../components/StatusSelect";
 import { EditableText } from "../components/EditableField";
 
 export default function MomentsCalendar() {
-  const { moments } = useCampaign();
+  const { moments, campaigns, creatives } = useCampaign();
   const { isEditMode } = useAuth();
 
   const sorted = [...moments.items].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -17,6 +18,14 @@ export default function MomentsCalendar() {
     return d >= now && m.status !== "done" && m.status !== "live";
   }).length;
   const next = sorted.find((m) => new Date(m.date) >= now && m.status !== "done");
+
+  // Build linked lookups
+  function getLinkedCampaigns(momentId) {
+    return campaigns.items.filter((c) => c.linkedMoment === momentId);
+  }
+  function getLinkedCreatives(momentId) {
+    return creatives.items.filter((c) => c.linkedMoment === momentId);
+  }
 
   return (
     <div>
@@ -65,11 +74,13 @@ export default function MomentsCalendar() {
           background: "var(--border)", zIndex: 0,
         }} />
 
-        {sorted.map((m, i) => {
+        {sorted.map((m) => {
           const d = new Date(m.date);
           const isPast = d < now;
           const isToday = d.toDateString() === now.toDateString();
           const daysOut = Math.ceil((d - now) / 86400000);
+          const linkedCamps = getLinkedCampaigns(m.id);
+          const linkedCreativs = getLinkedCreatives(m.id);
 
           return (
             <div key={m.id} style={{
@@ -154,6 +165,74 @@ export default function MomentsCalendar() {
                 <div style={{ marginTop: 10 }}>
                   <ChannelTags channels={m.channels} />
                 </div>
+
+                {/* Linked Campaigns */}
+                {linkedCamps.length > 0 && (
+                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+                      Linked Campaigns ({linkedCamps.length})
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {linkedCamps.map((camp) => {
+                        const statusColors = {
+                          not_started: "var(--text-muted)", in_progress: "var(--yellow)",
+                          live: "var(--green)", done: "var(--green)", iterating: "var(--blue)", paused: "var(--orange)",
+                        };
+                        return (
+                          <div key={camp.id} style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "4px 10px", borderRadius: "var(--radius-sm)",
+                            background: "var(--bg-surface)", border: "1px solid var(--border)",
+                            fontSize: 11,
+                          }}>
+                            <span className="status-dot" style={{ background: statusColors[camp.status] || "var(--text-muted)" }} />
+                            <span style={{ fontWeight: 600 }}>{camp.name || "(unnamed)"}</span>
+                            <span style={{ color: "var(--text-muted)", fontSize: 9 }}>
+                              {CHANNEL_NAMES[camp.channel?.replace("ch-", "")] || camp.channel}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Linked Creatives */}
+                {linkedCreativs.length > 0 && (
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: linkedCamps.length > 0 ? "none" : "1px solid var(--border)" }}>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+                      Content Needed ({linkedCreativs.length})
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {linkedCreativs.map((c) => {
+                        const fmtColors = { video: "#ff4444", image: "#4c9aff", email: "#f0b429", carousel: "#a855f7", story: "#ff0050" };
+                        const statusColors = {
+                          not_started: "var(--text-muted)", in_progress: "var(--yellow)",
+                          live: "var(--green)", done: "var(--green)", iterating: "var(--blue)", paused: "var(--orange)",
+                        };
+                        return (
+                          <div key={c.id} style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "4px 10px", borderRadius: "var(--radius-sm)",
+                            background: `${fmtColors[c.format] || "#999"}08`,
+                            border: `1px solid ${fmtColors[c.format] || "#999"}20`,
+                            fontSize: 11,
+                          }}>
+                            <span className="status-dot" style={{ background: statusColors[c.status] || "var(--text-muted)" }} />
+                            <span style={{ fontWeight: 500, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {c.hook || "(no hook)"}
+                            </span>
+                            <span className="channel-tag" style={{
+                              background: `${fmtColors[c.format] || "#999"}18`,
+                              color: fmtColors[c.format] || "#999",
+                              fontSize: 9, padding: "1px 6px",
+                            }}>{c.format}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );
